@@ -1,0 +1,53 @@
+﻿@model WarehouseManagement.Models.Material
+
+@{
+    ViewData["Title"] = "حذف المادة";
+}
+
+<h2>حذف المادة</h2>
+
+<div class="alert alert-danger">
+    <h5>⚠️ تحذير</h5>
+    <p>هل أنت متأكد من حذف هذه المادة؟ هذا الإجراء لا يمكن التراجع عنه.</p>
+</div>
+
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5>المادة المراد حذفها</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">اسم المادة:</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">رمز المادة:</dt>
+            <dd class="col-sm-9">@Model.Code</dd>
+
+            <dt class="col-sm-3">الفئة:</dt>
+            <dd class="col-sm-9">@Model.Category.Name</dd>
+
+            <dt class="col-sm-3">الموقع:</dt>
+            <dd class="col-sm-9">@Model.Location.Name</dd>
+
+            <dt class="col-sm-3">الكمية:</dt>
+            <dd class="col-sm-9">@Model.Quantity @Model.Unit</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete" class="mt-3">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <input type="submit" value="تأكيد الحذف" class="btn btn-danger" onclick="return confirm('هل أنت متأكد من حذف هذه المادة؟')" />
+        <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">عرض التفاصيل</a>
+    </div>
+</form>
+</div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

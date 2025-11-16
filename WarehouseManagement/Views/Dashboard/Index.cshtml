@@ -1,0 +1,237 @@
+﻿@model WarehouseManagement.Models.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>لوحة التحكم - نظام إدارة المخازن</h2>
+        <p class="text-muted">نظرة شاملة على حالة المخزون والعمليات</p>
+    </div>
+</div>
+
+<!-- إحصائيات سريعة -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3>@Model.TotalMaterials</h3>
+                <p class="mb-0">إجمالي المواد</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3>@Model.TotalLocations</h3>
+                <p class="mb-0">المواقع المسجلة</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h3>@Model.LowStockItems</h3>
+                <p class="mb-0">مواد قليلة المخزون</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h3>@Model.ExpiringItems</h3>
+                <p class="mb-0">مواد منتهية الصلاحية</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h3>@Model.TotalValue.ToString("C")</h3>
+                <p class="mb-0">القيمة الإجمالية للمخزون</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-secondary text-white">
+            <div class="card-body text-center">
+                <h3>@Model.PendingTransfers</h3>
+                <p class="mb-0">المناقلات المعلقة</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- الرسوم البيانية -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>توزيع المواد حسب الفئة</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="categoryChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>توزيع المواد حسب الموقع</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="locationChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- العمليات الأخيرة -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>آخر العمليات</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentTransfers.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>المادة</th>
+                                    <th>من</th>
+                                    <th>إلى</th>
+                                    <th>الكمية</th>
+                                    <th>التاريخ</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transfer in Model.RecentTransfers)
+                                {
+                                    <tr>
+                                        <td>@transfer.Material.Name</td>
+                                        <td>@transfer.FromLocation.Name</td>
+                                        <td>@transfer.ToLocation.Name</td>
+                                        <td>@transfer.Quantity</td>
+                                        <td>@transfer.TransferDate.ToString("MM-dd HH:mm")</td>
+                                        <td>
+                                            @if (transfer.IsConfirmed)
+                                            {
+                                                <span class="badge bg-success">مؤكد</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-warning">معلق</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">لا توجد عمليات حديثة</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>تنبيهات هامة</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.CriticalItems.Any())
+                {
+                    @foreach (var item in Model.CriticalItems)
+                    {
+                        <div class="alert alert-sm @(item.Quantity <= 5 ? "alert-danger" : "alert-warning") py-2">
+                            <strong>@item.Name</strong><br>
+                            <small>
+                                @if (item.Quantity <= 5)
+                                {
+                                    <span>مخزون قليل: @item.Quantity @item.Unit</span>
+                                }
+                                @if (item.ExpiryDate.HasValue && item.ExpiryDate <= DateTime.Now.AddDays(7))
+                                {
+                                    <span>ينتهي: @item.ExpiryDate.Value.ToString("yyyy-MM-dd")</span>
+                                }
+                            </small>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-success">
+                        <p class="mb-0">✅ لا توجد تنبيهات</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // رسم بياني للفئات
+        fetch('/Dashboard/GetChartData?type=materials-by-category')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.map(item => item.name),
+                        datasets: [{
+                            data: data.map(item => item.count),
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            });
+
+        // رسم بياني للمواقع
+        fetch('/Dashboard/GetChartData?type=materials-by-location')
+            .then(response => response.json())
+            .then(data => {
+                const ctx = document.getElementById('locationChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.map(item => item.name),
+                        datasets: [{
+                            label: 'عدد المواد',
+                            data: data.map(item => item.count),
+                            backgroundColor: '#36A2EB'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+    </script>
+}

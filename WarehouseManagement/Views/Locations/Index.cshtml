@@ -1,0 +1,62 @@
+﻿@using WarehouseManagement.Extensions
+@model IEnumerable<WarehouseManagement.Models.Location>
+
+@{
+    ViewData["Title"] = "إدارة المواقع";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>إدارة المواقع والغرف</h2>
+    <a asp-action="Create" class="btn btn-primary">إضافة موقع جديد</a>
+</div>
+
+<div class="row">
+    @foreach (var location in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">@location.Name</h5>
+                    <small>@location.Code</small>
+                </div>
+                <div class="card-body">
+                    <p><strong>النوع:</strong> @location.Type.GetDisplayName()</p>
+                    @if (!string.IsNullOrEmpty(location.Building))
+                    {
+                        <p><strong>المبنى:</strong> @location.Building</p>
+                    }
+                    @if (location.Floor.HasValue)
+                    {
+                        <p><strong>الطابق:</strong> @location.Floor</p>
+                    }
+                    @if (location.MaxCapacity.HasValue)
+                    {
+                        <p><strong>السعة:</strong> @location.MaxCapacity</p>
+                    }
+
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-primary">@location.Materials.Count</h5>
+                                <small>عدد المواد</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center">
+                                <h5 class="text-success">@location.Materials.Sum(m => m.Quantity)</h5>
+                                <small>إجمالي الكمية</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="btn-group w-100" role="group">
+                        <a asp-action="Details" asp-route-id="@location.Id" class="btn btn-outline-info btn-sm">عرض</a>
+                        <a asp-action="Edit" asp-route-id="@location.Id" class="btn btn-outline-primary btn-sm">تعديل</a>
+                        <a asp-controller="Reports" asp-action="LocationReport" asp-route-id="@location.Id" class="btn btn-outline-success btn-sm">تقرير</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

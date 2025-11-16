@@ -1,0 +1,98 @@
+﻿@model WarehouseManagement.Models.Category
+
+@{
+    ViewData["Title"] = "تفاصيل الفئة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>تفاصيل الفئة: @Model.Name</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">تعديل</a>
+        <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>معلومات الفئة</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">اسم الفئة:</dt>
+                    <dd class="col-sm-9">@Model.Name</dd>
+
+                    <dt class="col-sm-3">الوصف:</dt>
+                    <dd class="col-sm-9">@(Model.Description ?? "غير محدد")</dd>
+
+                    <dt class="col-sm-3">تاريخ الإنشاء:</dt>
+                    <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                    <dt class="col-sm-3">عدد المواد:</dt>
+                    <dd class="col-sm-9">
+                        <span class="badge bg-info">@Model.Materials.Count مادة</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>إحصائيات الفئة</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="text-primary">@Model.Materials.Count</h3>
+                <p>إجمالي المواد</p>
+                <hr>
+                <h3 class="text-success">@Model.Materials.Sum(m => m.Quantity)</h3>
+                <p>إجمالي الكمية</p>
+                <hr>
+                <h3 class="text-info">@Model.Materials.Sum(m => (m.Price ?? 0) * m.Quantity).ToString("C")</h3>
+                <p>القيمة الإجمالية</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Materials.Any())
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>المواد في هذه الفئة</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الرمز</th>
+                            <th>اسم المادة</th>
+                            <th>الموقع</th>
+                            <th>الكمية</th>
+                            <th>الوحدة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var material in Model.Materials)
+                    {
+                        <tr>
+                            <td>@material.Code</td>
+                            <td>@material.Name</td>
+                            <td>@material.Location?.Name</td>
+                            <td>@material.Quantity</td>
+                            <td>@material.Unit</td>
+                            <td>
+                                <a asp-controller="Materials" asp-action="Details" asp-route-id="@material.Id" class="btn btn-sm btn-outline-info">عرض</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

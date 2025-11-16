@@ -1,0 +1,46 @@
+﻿@using WarehouseManagement.Extensions
+@model IEnumerable<WarehouseManagement.Models.Location>
+
+@{
+    ViewData["Title"] = "تقارير المواقع";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>تقارير جميع المواقع</h2>
+    <button onclick="window.print()" class="btn btn-success no-print">طباعة جميع التقارير</button>
+</div>
+
+<div class="row">
+    @foreach (var location in Model)
+    {
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">@location.Name</h5>
+                    <small>@location.Code - @location.Type.GetDisplayName()</small>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>عدد المواد:</strong><br>
+                            <span class="badge bg-info">@location.Materials.Count</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>إجمالي الكمية:</strong><br>
+                            <span class="badge bg-success">@location.Materials.Sum(m => m.Quantity)</span>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a asp-action="LocationReport" asp-route-id="@location.Id" class="btn btn-outline-primary btn-sm">
+                            عرض التقرير المفصل
+                        </a>
+                        <a asp-action="PrintLocationReport" asp-route-id="@location.Id" target="_blank" class="btn btn-outline-success btn-sm">
+                            طباعة التقرير
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

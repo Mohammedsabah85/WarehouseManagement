@@ -1,0 +1,171 @@
+﻿@{
+    ViewData["Title"] = "الصفحة الرئيسية";
+}
+
+<div class="jumbotron bg-primary text-white p-5 rounded mb-4">
+    <div class="container">
+        <h1 class="display-4">نظام إدارة المخازن</h1>
+        <p class="lead">نظام شامل لإدارة المواد والمخازن بكفاءة عالية</p>
+        <hr class="my-4">
+        <p>تتبع المواد، إدارة المواقع، تسجيل المناقلات، وإنتاج التقارير المفصلة</p>
+    </div>
+</div>
+
+<!-- إحصائيات سريعة -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h2>@ViewBag.TotalMaterials</h2>
+                <p>إجمالي المواد</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h2>@ViewBag.TotalLocations</h2>
+                <p>المواقع المسجلة</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h2>@ViewBag.LowStockItems</h2>
+                <p>مواد قليلة المخزون</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h2>@ViewBag.ExpiringItems</h2>
+                <p>مواد منتهية الصلاحية</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <i class="fas fa-boxes fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">إدارة المواد</h5>
+                <p class="card-text">إضافة وتعديل وتتبع جميع المواد في المؤسسة</p>
+                <a asp-controller="Materials" asp-action="Index" class="btn btn-primary">إدارة المواد</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <i class="fas fa-exchange-alt fa-3x text-success mb-3"></i>
+                <h5 class="card-title">المناقلات</h5>
+                <p class="card-text">نقل المواد بين المواقع المختلفة وتتبع العمليات</p>
+                <a asp-controller="Transfers" asp-action="Index" class="btn btn-success">إدارة المناقلات</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <i class="fas fa-search fa-3x text-info mb-3"></i>
+                <h5 class="card-title">البحث</h5>
+                <p class="card-text">البحث المتقدم عن المواد والمعلومات</p>
+                <a asp-controller="Materials" asp-action="Search" class="btn btn-info">البحث المتقدم</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-center mb-4">
+            <div class="card-body">
+                <i class="fas fa-chart-bar fa-3x text-warning mb-3"></i>
+                <h5 class="card-title">التقارير</h5>
+                <p class="card-text">تقارير شاملة عن المخزون والمواقع</p>
+                <a asp-controller="Reports" asp-action="AllLocations" class="btn btn-warning">عرض التقارير</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.RecentTransfers != null && ((List<WarehouseManagement.Models.Transfer>)ViewBag.RecentTransfers).Any())
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>آخر العمليات</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>المادة</th>
+                            <th>من</th>
+                            <th>إلى</th>
+                            <th>الكمية</th>
+                            <th>التاريخ</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transfer in (List<WarehouseManagement.Models.Transfer>)ViewBag.RecentTransfers)
+                        {
+                            <tr>
+                                <td>@transfer.Material.Name</td>
+                                <td>@transfer.FromLocation.Name</td>
+                                <td>@transfer.ToLocation.Name</td>
+                                <td>@transfer.Quantity</td>
+                                <td>@transfer.TransferDate.ToString("MM-dd HH:mm")</td>
+                                <td>
+                                    @if (transfer.IsConfirmed)
+                                    {
+                                        <span class="badge bg-success">مؤكد</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning">معلق</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>الميزات الرئيسية للنظام</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li>✓ إدارة شاملة للمواد والمخزون</li>
+                            <li>✓ تتبع المواقع والغرف المختلفة</li>
+                            <li>✓ نظام مناقلات متقدم</li>
+                            <li>✓ البحث المتقدم والفلترة</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li>✓ تقارير مفصلة قابلة للطباعة</li>
+                            <li>✓ تتبع تواريخ انتهاء الصلاحية</li>
+                            <li>✓ إشعارات المخزون المنخفض</li>
+                            <li>✓ واجهة سهلة الاستخدام</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,142 @@
+﻿@model WarehouseManagement.Models.Location
+@using WarehouseManagement.Extensions
+
+@{
+    ViewData["Title"] = "تفاصيل الموقع";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>تفاصيل الموقع: @Model.Name</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">تعديل</a>
+        <a asp-controller="Reports" asp-action="LocationReport" asp-route-id="@Model.Id" class="btn btn-success">طباعة التقرير</a>
+        <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- معلومات الموقع -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>معلومات الموقع</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">اسم الموقع:</dt>
+                    <dd class="col-sm-9">@Model.Name</dd>
+
+                    <dt class="col-sm-3">رمز الموقع:</dt>
+                    <dd class="col-sm-9"><code>@Model.Code</code></dd>
+
+                    <dt class="col-sm-3">نوع الموقع:</dt>
+                    <dd class="col-sm-9">@Model.Type.GetDisplayName()</dd>
+
+                    <dt class="col-sm-3">الوصف:</dt>
+                    <dd class="col-sm-9">@(Model.Description ?? "غير محدد")</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Building))
+                    {
+                        <dt class="col-sm-3">المبنى:</dt>
+                        <dd class="col-sm-9">@Model.Building</dd>
+                    }
+
+                    @if (Model.Floor.HasValue)
+                    {
+                        <dt class="col-sm-3">الطابق:</dt>
+                        <dd class="col-sm-9">@Model.Floor</dd>
+                    }
+
+                    @if (Model.MaxCapacity.HasValue)
+                    {
+                        <dt class="col-sm-3">السعة القصوى:</dt>
+                        <dd class="col-sm-9">@Model.MaxCapacity</dd>
+                    }
+
+                    <dt class="col-sm-3">تاريخ الإنشاء:</dt>
+                    <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- إحصائيات الموقع -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>إحصائيات الموقع</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3 class="text-primary">@Model.Materials.Count</h3>
+                <p>أنواع المواد</p>
+                <hr>
+
+                <h3 class="text-success">@Model.Materials.Sum(m => m.Quantity)</h3>
+                <p>إجمالي الكمية</p>
+                <hr>
+
+                @if (Model.MaxCapacity.HasValue)
+                {
+                    var usagePercentage = Model.MaxCapacity > 0
+                    ? (double)Model.Materials.Sum(m => m.Quantity) / Model.MaxCapacity.Value * 100
+                    : 0;
+
+                    <h3 class="@(usagePercentage > 80 ? "text-danger" : usagePercentage > 60 ? "text-warning" : "text-info")">
+                        @usagePercentage.ToString("F1")%
+                    </h3>
+                    <p>نسبة الاستخدام</p>
+
+                    <div class="progress">
+                        <div class="progress-bar @(usagePercentage > 80 ? "bg-danger" : usagePercentage > 60 ? "bg-warning" : "bg-success")"
+                             style="width: @usagePercentage%">
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- جدول المواد -->
+@if (Model.Materials.Any())
+{
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>المواد الموجودة في هذا الموقع</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الرمز</th>
+                            <th>اسم المادة</th>
+                            <th>الفئة</th>
+                            <th>الكمية</th>
+                            <th>الوحدة</th>
+                            <th>السعر</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var material in Model.Materials.Where(m => m.Quantity > 0))
+                        {
+                            <tr>
+                                <td>@material.Code</td>
+                                <td>@material.Name</td>
+                                <td>@material.Category?.Name</td>
+                                <td>@material.Quantity</td>
+                                <td>@material.Unit</td>
+                                <td>@(material.Price?.ToString("C") ?? "غير محدد")</td>
+                                <td>
+                                    <a asp-controller="Materials" asp-action="Details" asp-route-id="@material.Id" class="btn btn-sm btn-outline-info">عرض</a>
+                                    <a asp-controller="Transfers" asp-action="Create" asp-route-materialId="@material.Id" class="btn btn-sm btn-outline-primary">نقل</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

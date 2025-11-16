@@ -1,0 +1,113 @@
+﻿@model WarehouseManagement.Models.ViewModels.MaterialSearchViewModel
+@using WarehouseManagement.Extensions
+
+@{
+    ViewData["Title"] = "البحث عن المواد";
+}
+
+<h2>البحث المتقدم عن المواد</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Search" method="post">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="SearchTerm" class="control-label"></label>
+                        <input asp-for="SearchTerm" class="form-control" placeholder="ادخل اسم المادة أو الرمز..." />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="CategoryId" class="control-label"></label>
+                        <select asp-for="CategoryId" class="form-control">
+                            <option value="">-- اختر الفئة --</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="LocationId" class="control-label"></label>
+                        <select asp-for="LocationId" class="form-control">
+                            <option value="">-- اختر الموقع --</option>
+                            @foreach (var location in Model.Locations)
+                            {
+                                <option value="@location.Id">@location.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label asp-for="LocationType" class="control-label"></label>
+                        <select asp-for="LocationType" class="form-control">
+                            <option value="">-- اختر نوع الموقع --</option>
+                            @foreach (var type in Enum.GetValues<WarehouseManagement.Models.LocationType>())
+                            {
+                                <option value="@type">@type.GetDisplayName()</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-primary">بحث</button>
+                    <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Results.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h5>نتائج البحث (@Model.Results.Count مادة)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الرمز</th>
+                            <th>اسم المادة</th>
+                            <th>الفئة</th>
+                            <th>الموقع</th>
+                            <th>الكمية</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Results)
+                        {
+                            <tr>
+                                <td>@item.Code</td>
+                                <td>@item.Name</td>
+                                <td>@item.Category.Name</td>
+                                <td>@item.Location.Name</td>
+                                <td>@item.Quantity @item.Unit</td>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info">عرض</a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else if (ViewContext.HttpContext.Request.Method == "POST")
+{
+    <div class="alert alert-info">
+        <h5>لا توجد نتائج</h5>
+        <p>لم يتم العثور على مواد تطابق معايير البحث المحددة.</p>
+    </div>
+}

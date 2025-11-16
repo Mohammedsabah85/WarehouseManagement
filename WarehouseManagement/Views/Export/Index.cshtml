@@ -1,0 +1,115 @@
+﻿@model WarehouseManagement.Models.ViewModels.ExportViewModel
+
+@{
+    ViewData["Title"] = "تصدير البيانات";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>تصدير البيانات</h2>
+        <p class="text-muted">تصدير البيانات إلى ملفات Excel أو CSV</p>
+    </div>
+</div>
+
+<div class="row">
+    <!-- تصدير المواد -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5>تصدير بيانات المواد</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="ExportMaterials" method="post">
+                    <div class="form-group">
+                        <label>نوع التصدير:</label>
+                        <select name="ExportType" class="form-control" required>
+                            <option value="">-- اختر نوع التصدير --</option>
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الفئة (اختياري):</label>
+                        <select name="CategoryId" class="form-control">
+                            <option value="">-- جميع الفئات --</option>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>الموقع (اختياري):</label>
+                        <select name="LocationId" class="form-control">
+                            <option value="">-- جميع المواقع --</option>
+                            @foreach (var location in Model.Locations)
+                            {
+                                <option value="@location.Id">@location.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-check">
+                        <input type="checkbox" name="IncludeZeroQuantity" class="form-check-input" id="includeZero">
+                        <label class="form-check-label" for="includeZero">
+                            تضمين المواد بكمية صفر
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="fas fa-download"></i> تصدير المواد
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- تصدير المناقلات -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5>تصدير بيانات المناقلات</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="ExportTransfers" method="post">
+                    <input type="hidden" name="ExportType" value="csv">
+
+                    <div class="form-group">
+                        <label>من تاريخ (اختياري):</label>
+                        <input type="date" name="StartDate" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label>إلى تاريخ (اختياري):</label>
+                        <input type="date" name="EndDate" class="form-control">
+                    </div>
+
+                    <button type="submit" class="btn btn-success mt-3">
+                        <i class="fas fa-download"></i> تصدير المناقلات
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- نصائح للتصدير -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>نصائح للتصدير</h5>
+            </div>
+            <div class="card-body">
+                <ul>
+                    <li><strong>CSV:</strong> مناسب للتعامل مع البيانات في برامج أخرى أو قواعد بيانات</li>
+                    <li><strong>Excel:</strong> مناسب للتحليل والتقارير المكتبية</li>
+                    <li>يمكن فتح ملفات CSV في Excel عبر "البيانات" > "من نص/CSV"</li>
+                    <li>تأكد من اختيار الترميز UTF-8 عند فتح الملفات للحفاظ على النصوص العربية</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

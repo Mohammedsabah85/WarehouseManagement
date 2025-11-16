@@ -1,0 +1,65 @@
+﻿@model WarehouseManagement.Models.Category
+
+@{
+    ViewData["Title"] = "حذف الفئة";
+}
+
+<h2>حذف الفئة</h2>
+
+<div class="alert alert-danger">
+    <h5>⚠️ تحذير</h5>
+    <p>هل أنت متأكد من حذف هذه الفئة؟ هذا الإجراء لا يمكن التراجع عنه.</p>
+    @if (Model.Materials.Any())
+    {
+        <p>
+            <strong>تحذير:</strong>
+            هذه الفئة تحتوي على @Model.Materials.Count مادة. لا يمكن حذفها.
+        </p>
+    }
+</div>
+
+<div class="card">
+    <div class="card-header bg-danger text-white">
+        <h5>الفئة المراد حذفها</h5>
+    </div>
+    <div class="card-body">
+        <dl class="row">
+            <dt class="col-sm-3">اسم الفئة:</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+
+            <dt class="col-sm-3">الوصف:</dt>
+            <dd class="col-sm-9">@(Model.Description ?? "غير محدد")</dd>
+
+            <dt class="col-sm-3">عدد المواد:</dt>
+            <dd class="col-sm-9">@Model.Materials.Count</dd>
+
+            <dt class="col-sm-3">تاريخ الإنشاء:</dt>
+            <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd")</dd>
+        </dl>
+    </div>
+</div>
+
+<form asp-action="Delete" class="mt-3">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        @if (Model.Materials.Any())
+        {
+            <div class="alert alert-warning">
+                <p>
+                    لا يمكن حذف الفئة لأنها تحتوي على مواد. يجب حذف أو نقل المواد أولاً.
+                </p>
+            </div>
+        }
+        else
+        {
+            <input
+                type="submit"
+                value="تأكيد الحذف"
+                class="btn btn-danger"
+                onclick="return confirm('هل أنت متأكد من حذف هذه الفئة؟')"
+            />
+        }
+        <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+        <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-info">عرض التفاصيل</a>
+    </div>
+</form>

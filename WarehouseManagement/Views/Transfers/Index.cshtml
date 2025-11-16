@@ -1,0 +1,96 @@
+﻿@model IEnumerable<WarehouseManagement.Models.Transfer>
+
+@{
+    ViewData["Title"] = "المناقلات";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>إدارة المناقلات</h2>
+    <a asp-action="Create" class="btn btn-primary">إنشاء عملية نقل جديدة</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>رقم العملية</th>
+                        <th>المادة</th>
+                        <th>من الموقع</th>
+                        <th>إلى الموقع</th>
+                        <th>الكمية</th>
+                        <th>تاريخ النقل</th>
+                        <th>المسؤول</th>
+                        <th>الحالة</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Id</td>
+                            <td>@item.Material.Name</td>
+                            <td>@item.FromLocation.Name</td>
+                            <td>@item.ToLocation.Name</td>
+                            <td>@item.Quantity @item.Material.Unit</td>
+                            <td>@item.TransferDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@item.TransferredBy</td>
+                            <td>
+                                @if (item.IsConfirmed)
+                                {
+                                    <span class="badge bg-success">مؤكد</span>
+                                    <br>
+
+                                    <small>@item.ConfirmedBy</small>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">في الانتظار</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!item.IsConfirmed)
+                                {
+                                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmModal@(item.Id)">
+                                        تأكيد
+                                    </button>
+
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="confirmModal@(item.Id)" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">تأكيد عملية النقل</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form asp-action="Confirm" asp-route-id="@item.Id" method="post">
+                                                    <div class="modal-body">
+                                                        <p>هل أنت متأكد من تأكيد عملية نقل <strong>@item.Material.Name</strong>؟</p>
+                                                        <div class="form-group">
+                                                            <label for="confirmedBy">اسم المؤكد:</label>
+                                                            <input type="text" class="form-control" name="confirmedBy" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                                        <button type="submit" class="btn btn-success">تأكيد</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-success">✓ تم التأكيد</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

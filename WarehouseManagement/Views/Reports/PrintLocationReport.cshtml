@@ -1,0 +1,146 @@
+﻿@using WarehouseManagement.Extensions
+@model WarehouseManagement.Models.ViewModels.LocationReportViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تقرير الموقع - @Model.Location.Name</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .location-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        table {
+            font-size: 11px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        @@media print {
+            .no-print
+
+        {
+            display: none !important;
+        }
+
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>نظام إدارة المخازن</h1>
+            <h2>تقرير الموقع: @Model.Location.Name</h2>
+            <p>تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</p>
+        </div>
+
+        <div class="location-info">
+            <div class="row">
+                <div class="col-6">
+                    <strong>اسم الموقع:</strong> @Model.Location.Name<br>
+                    <strong>رمز الموقع:</strong> @Model.Location.Code<br>
+                    <strong>نوع الموقع:</strong> @Model.Location.Type.GetDisplayName()
+                </div>
+                <div class="col-6">
+                    <strong>المبنى:</strong> @(Model.Location.Building ?? "غير محدد")<br>
+                    <strong>الطابق:</strong> @(Model.Location.Floor?.ToString() ?? "غير محدد")<br>
+                    <strong>السعة القصوى:</strong> @(Model.Location.MaxCapacity?.ToString() ?? "غير محددة")
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-4 text-center">
+                <h5>@Model.TotalItems</h5>
+                <small>عدد أنواع المواد</small>
+            </div>
+            <div class="col-4 text-center">
+                <h5>@Model.TotalQuantity</h5>
+                <small>إجمالي الكمية</small>
+            </div>
+            <div class="col-4 text-center">
+                <h5>@Model.Materials.Sum(m => m.Price ?? 0).ToString("C")</h5>
+                <small>إجمالي القيمة التقديرية</small>
+            </div>
+        </div>
+
+        @if (Model.Materials.Any())
+        {
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>م</th>
+                        <th>الرمز</th>
+                        <th>اسم المادة</th>
+                        <th>الفئة</th>
+                        <th>الكمية</th>
+                        <th>الوحدة</th>
+                        <th>السعر</th>
+                        <th>انتهاء الصلاحية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Materials.Count; i++)
+                    {
+                        var material = Model.Materials[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@material.Code</td>
+                            <td>@material.Name</td>
+                            <td>@material.Category.Name</td>
+                            <td>@material.Quantity</td>
+                            <td>@material.Unit</td>
+                            <td>@(material.Price?.ToString("C") ?? "-")</td>
+                            <td>@(material.ExpiryDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <strong>لا توجد مواد مخزنة في هذا الموقع حالياً.</strong>
+            </div>
+        }
+    </div>
+
+    <div class="footer">
+        <small>تم إنشاء هذا التقرير بواسطة نظام إدارة المخازن - @DateTime.Now.ToString("yyyy")</small>
+    </div>
+
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

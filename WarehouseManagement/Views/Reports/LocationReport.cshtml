@@ -1,0 +1,121 @@
+﻿@model WarehouseManagement.Models.ViewModels.LocationReportViewModel
+@using WarehouseManagement.Extensions
+
+@{
+    ViewData["Title"] = "تقرير الموقع - " + Model.Location.Name;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>تقرير الموقع: @Model.Location.Name</h2>
+    <div class="no-print">
+        <a asp-action="PrintLocationReport" asp-route-id="@Model.Location.Id" target="_blank" class="btn btn-success">
+            <i class="fas fa-print"></i> طباعة التقرير
+        </a>
+        <a asp-action="AllLocations" class="btn btn-secondary">العودة للمواقع</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>معلومات الموقع</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>اسم الموقع:</strong> @Model.Location.Name</p>
+                <p><strong>رمز الموقع:</strong> @Model.Location.Code</p>
+                <p><strong>نوع الموقع:</strong> @Model.Location.Type.GetDisplayName()</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>المبنى:</strong> @(Model.Location.Building ?? "غير محدد")</p>
+                <p><strong>الطابق:</strong> @(Model.Location.Floor?.ToString() ?? "غير محدد")</p>
+                <p><strong>السعة القصوى:</strong> @(Model.Location.MaxCapacity?.ToString() ?? "غير محددة")</p>
+            </div>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Location.Description))
+        {
+            <p>
+                <strong>الوصف:</strong> @Model.Location.Description
+            </p>
+        }
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>إحصائيات المواد</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="text-primary">@Model.TotalItems</h4>
+                    <small>عدد أنواع المواد</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="text-success">@Model.TotalQuantity</h4>
+                    <small>إجمالي الكمية</small>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h4 class="text-info">@Model.GeneratedDate.ToString("yyyy-MM-dd HH:mm")</h4>
+                    <small>تاريخ إنشاء التقرير</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>قائمة المواد الموجودة</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.Materials.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>الرمز</th>
+                            <th>اسم المادة</th>
+                            <th>الفئة</th>
+                            <th>الكمية</th>
+                            <th>الوحدة</th>
+                            <th>السعر</th>
+                            <th>تاريخ انتهاء الصلاحية</th>
+                            <th class="no-print">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var material in Model.Materials)
+                    {
+                        <tr>
+                            <td>@material.Code</td>
+                            <td>@material.Name</td>
+                            <td>@material.Category.Name</td>
+                            <td>@material.Quantity</td>
+                            <td>@material.Unit</td>
+                            <td>@(material.Price?.ToString("C") ?? "غير محدد")</td>
+                            <td>@(material.ExpiryDate?.ToString("yyyy-MM-dd") ?? "غير محدد")</td>
+                            <td class="no-print">
+                                <a asp-controller="Materials" asp-action="Details" asp-route-id="@material.Id" class="btn btn-sm btn-outline-info">عرض</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info">
+                <h6>لا توجد مواد</h6>
+                <p>لا توجد مواد مخزنة في هذا الموقع حالياً.</p>
+            </div>
+        }
+    </div>
+</div>

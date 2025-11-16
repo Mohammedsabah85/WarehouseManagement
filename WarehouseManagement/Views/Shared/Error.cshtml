@@ -1,0 +1,21 @@
+﻿@model WarehouseManagement.Models.ErrorViewModel
+@{
+    ViewData["Title"] = "خطأ";
+}
+
+<h1 class="text-danger">خطأ.</h1>
+<h2 class="text-danger">حدث خطأ أثناء معالجة طلبك.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>معرف الطلب:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<h3>خطوات للحل:</h3>
+<ul>
+    <li>تأكد من صحة البيانات المدخلة</li>
+    <li>حاول مرة أخرى</li>
+    <li>إذا استمر الخطأ، اتصل بالدعم الفني</li>
+</ul>

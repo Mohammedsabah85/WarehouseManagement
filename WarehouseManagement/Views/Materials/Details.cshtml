@@ -1,0 +1,143 @@
+﻿@using WarehouseManagement.Extensions
+@model WarehouseManagement.Models.Material
+
+@{
+    ViewData["Title"] = "تفاصيل المادة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>تفاصيل المادة: @Model.Name</h2>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">تعديل</a>
+        <a asp-action="Index" class="btn btn-secondary">العودة للقائمة</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5>المعلومات الأساسية</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">اسم المادة:</dt>
+                    <dd class="col-sm-9">@Model.Name</dd>
+
+                    <dt class="col-sm-3">رمز المادة:</dt>
+                    <dd class="col-sm-9"><code>@Model.Code</code></dd>
+
+                    <dt class="col-sm-3">الوصف:</dt>
+                    <dd class="col-sm-9">@(Model.Description ?? "غير محدد")</dd>
+
+                    <dt class="col-sm-3">الفئة:</dt>
+                    <dd class="col-sm-9">@Model.Category.Name</dd>
+
+                    <dt class="col-sm-3">الموقع:</dt>
+                    <dd class="col-sm-9">@Model.Location.Name</dd>
+
+                    <dt class="col-sm-3">الكمية:</dt>
+                    <dd class="col-sm-9">
+                        <strong>@Model.Quantity @Model.Unit</strong>
+                        @if (Model.Quantity <= 10)
+                        {
+                            <span class="badge bg-warning">مخزون قليل</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">السعر:</dt>
+                    <dd class="col-sm-9">@(Model.Price?.ToString("C") ?? "غير محدد")</dd>
+
+                    <dt class="col-sm-3">تاريخ انتهاء الصلاحية:</dt>
+                    <dd class="col-sm-9">
+                        @if (Model.ExpiryDate.HasValue)
+                        {
+                            @Model.ExpiryDate.Value.ToString("yyyy-MM-dd")
+
+                            var daysRemaining = (Model.ExpiryDate.Value - DateTime.Now).Days;
+
+                            if (daysRemaining <= 0)
+                            {
+                                <span class="badge bg-danger">منتهية الصلاحية</span>
+                            }
+                            else if (daysRemaining <= 30)
+                            {
+                                <span class="badge bg-warning">تنتهي خلال @daysRemaining يوم</span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">غير محدد</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-3">تاريخ الإضافة:</dt>
+                    <dd class="col-sm-9">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                    <dt class="col-sm-3">آخر تحديث:</dt>
+                    <dd class="col-sm-9">@Model.LastUpdated.ToString("yyyy-MM-dd HH:mm")</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-3">ملاحظات:</dt>
+                        <dd class="col-sm-9">@Model.Notes</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>إجراءات سريعة</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="Transfers" asp-action="Create" asp-route-materialId="@Model.Id" class="btn btn-outline-primary">
+                        نقل المادة
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-warning">
+                        تعديل البيانات
+                    </a>
+                    <a asp-controller="Reports" asp-action="LocationReport" asp-route-id="@Model.LocationId" class="btn btn-outline-info">
+                        عرض تقرير الموقع
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                        حذف المادة
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5>معلومات الموقع</h5>
+            </div>
+            <div class="card-body">
+                <dl>
+                    <dt>اسم الموقع:</dt>
+                    <dd>@Model.Location.Name</dd>
+
+                    <dt>رمز الموقع:</dt>
+                    <dd>@Model.Location.Code</dd>
+
+                    <dt>نوع الموقع:</dt>
+                    <dd>@Model.Location.Type.GetDisplayName()</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Location.Building))
+                    {
+                        <dt>المبنى:</dt>
+                        <dd>@Model.Location.Building</dd>
+                    }
+
+                    @if (Model.Location.Floor.HasValue)
+                    {
+                        <dt>الطابق:</dt>
+                        <dd>@Model.Location.Floor</dd>
+                    }
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
