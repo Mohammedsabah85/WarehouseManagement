@@ -13,6 +13,9 @@ namespace WarehouseManagement.Data
         public DbSet<Category> Categories { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
+        public DbSet<AnnualInventory> AnnualInventories { get; set; }
+        public DbSet<PurchasePrice> PurchasePrices { get; set; }
+        public DbSet<ConsumedMaterial> ConsumedMaterials { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,6 +56,27 @@ namespace WarehouseManagement.Data
                 .HasForeignKey(t => t.ToLocationId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // AnnualInventory - Material (Many-to-One)
+            modelBuilder.Entity<AnnualInventory>()
+                .HasOne(a => a.Material)
+                .WithMany()
+                .HasForeignKey(a => a.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // PurchasePrice - Material (Many-to-One)
+            modelBuilder.Entity<PurchasePrice>()
+                .HasOne(p => p.Material)
+                .WithMany()
+                .HasForeignKey(p => p.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // ConsumedMaterial - Material (Many-to-One)
+            modelBuilder.Entity<ConsumedMaterial>()
+                .HasOne(c => c.Material)
+                .WithMany()
+                .HasForeignKey(c => c.MaterialId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // تكوين الفهارس
             modelBuilder.Entity<Material>()
                 .HasIndex(m => m.Code)
@@ -62,9 +86,39 @@ namespace WarehouseManagement.Data
                 .HasIndex(l => l.Code)
                 .IsUnique();
 
+            modelBuilder.Entity<AnnualInventory>()
+                .HasIndex(a => new { a.MaterialId, a.Year })
+                .IsUnique();
+
+            modelBuilder.Entity<PurchasePrice>()
+                .HasIndex(p => p.PurchaseYear);
+
+            modelBuilder.Entity<ConsumedMaterial>()
+                .HasIndex(c => c.ConsumptionDate);
+
             // تكوين أنواع البيانات
             modelBuilder.Entity<Material>()
                 .Property(m => m.Price)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<PurchasePrice>()
+                .Property(p => p.UnitPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<PurchasePrice>()
+                .Property(p => p.ExchangeRate)
+                .HasColumnType("decimal(18,4)");
+
+            modelBuilder.Entity<ConsumedMaterial>()
+                .Property(c => c.OriginalUnitPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<ConsumedMaterial>()
+                .Property(c => c.OriginalTotalPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<ConsumedMaterial>()
+                .Property(c => c.ResidualValue)
                 .HasColumnType("decimal(18,2)");
 
             // منع حذف المراجع المتقاطعة
@@ -86,7 +140,9 @@ namespace WarehouseManagement.Data
                 new Category { Id = 2, Name = "أثاث مكتبي", Description = "كراسي ومكاتب وخزائن", CreatedDate = DateTime.Now },
                 new Category { Id = 3, Name = "قرطاسية", Description = "أوراق وأقلام ومستلزمات مكتبية", CreatedDate = DateTime.Now },
                 new Category { Id = 4, Name = "أجهزة كهربائية", Description = "أجهزة كهربائية متنوعة", CreatedDate = DateTime.Now },
-                new Category { Id = 5, Name = "مواد تنظيف", Description = "مواد ومستلزمات التنظيف", CreatedDate = DateTime.Now }
+                new Category { Id = 5, Name = "مواد تنظيف", Description = "مواد ومستلزمات التنظيف", CreatedDate = DateTime.Now },
+                new Category { Id = 6, Name = "أدوات ومعدات", Description = "أدوات ومعدات متنوعة", CreatedDate = DateTime.Now },
+                new Category { Id = 7, Name = "مستلزمات طبية", Description = "مستلزمات ومعدات طبية", CreatedDate = DateTime.Now }
             );
 
             // Seed Locations
@@ -95,17 +151,23 @@ namespace WarehouseManagement.Data
                 new Location { Id = 2, Name = "مكتب الإدارة", Code = "OF-01", Type = LocationType.Office, Floor = 2, Building = "المبنى الرئيسي", CreatedDate = DateTime.Now },
                 new Location { Id = 3, Name = "ورشة الصيانة", Code = "WS-01", Type = LocationType.Workshop, Floor = 1, Building = "المبنى الفرعي", CreatedDate = DateTime.Now },
                 new Location { Id = 4, Name = "غرفة الاجتماعات", Code = "MR-01", Type = LocationType.MeetingRoom, Floor = 3, Building = "المبنى الرئيسي", CreatedDate = DateTime.Now },
-                new Location { Id = 5, Name = "المختبر", Code = "LB-01", Type = LocationType.Laboratory, Floor = 2, Building = "المبنى الفرعي", CreatedDate = DateTime.Now }
+                new Location { Id = 5, Name = "المختبر", Code = "LB-01", Type = LocationType.Laboratory, Floor = 2, Building = "المبنى الفرعي", CreatedDate = DateTime.Now },
+                new Location { Id = 6, Name = "قسم الهندسة الكهروميكانيك", Code = "ELEC-01", Type = LocationType.Office, Floor = 2, Building = "المبنى الهندسي", CreatedDate = DateTime.Now }
             );
 
             // Seed Sample Materials
             var now = DateTime.Now;
             modelBuilder.Entity<Material>().HasData(
-                new Material { Id = 1, Name = "جهاز كمبيوتر ديل", Code = "COMP-001", Description = "جهاز كمبيوتر مكتبي", Quantity = 10, Unit = "قطعة", Price = 2500.00m, CategoryId = 1, LocationId = 1, CreatedDate = now, LastUpdated = now },
-                new Material { Id = 2, Name = "كرسي مكتبي", Code = "CHAIR-001", Description = "كرسي مكتبي دوار", Quantity = 25, Unit = "قطعة", Price = 450.00m, CategoryId = 2, LocationId = 1, CreatedDate = now, LastUpdated = now },
-                new Material { Id = 3, Name = "ورق A4", Code = "PAPER-001", Description = "ورق طباعة أبيض", Quantity = 5, Unit = "علبة", Price = 25.00m, CategoryId = 3, LocationId = 1, CreatedDate = now, LastUpdated = now },
-                new Material { Id = 4, Name = "طابعة ليزر", Code = "PRINT-001", Description = "طابعة ليزر أحادية", Quantity = 3, Unit = "قطعة", Price = 1800.00m, CategoryId = 4, LocationId = 2, CreatedDate = now, LastUpdated = now },
-                new Material { Id = 5, Name = "مطهر أرضيات", Code = "CLEAN-001", Description = "مطهر أرضيات معطر", Quantity = 2, Unit = "لتر", Price = 15.00m, ExpiryDate = now.AddDays(30), CategoryId = 5, LocationId = 1, CreatedDate = now, LastUpdated = now }
+                new Material { Id = 1, Name = "حاسوب لاب توب", Code = "1/1/1", Description = "جهاز حاسوب محمول", Quantity = 159, Unit = "قطعة", Price = 750000.00m, CategoryId = 1, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 2, Name = "حاسوب سيستم (بلتن الكيس)", Code = "1/1/2", Description = "حاسوب مكتبي مدمج", Quantity = 73, Unit = "قطعة", Price = 570000.00m, CategoryId = 1, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 3, Name = "كيس حاسوب دسك توب", Code = "2/1/1", Description = "صندوق حاسوب مكتبي", Quantity = 143, Unit = "قطعة", Price = 300000.00m, CategoryId = 1, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 4, Name = "UPS (1000 – 500)", Code = "3/1/1", Description = "مصدر طاقة غير منقطع", Quantity = 83, Unit = "قطعة", Price = 64000.00m, CategoryId = 4, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 5, Name = "UPS (2500 -1100)", Code = "3/1/2", Description = "مصدر طاقة غير منقطع", Quantity = 6, Unit = "قطعة", Price = 85000.00m, CategoryId = 4, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 6, Name = "شاشة حاسوب 17 in", Code = "4/1/2", Description = "شاشة حاسوب 17 بوصة", Quantity = 4, Unit = "قطعة", Price = 150000.00m, CategoryId = 1, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 7, Name = "منضدة مكتب مع ملحق خشب", Code = "6/1/1", Description = "منضدة مكتب خشبية مع ملحقات", Quantity = 5, Unit = "قطعة", Price = 300700.00m, CategoryId = 2, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 8, Name = "منضدة مكتب معدن بدون مجرات", Code = "6/3/1", Description = "منضدة مكتب معدنية", Quantity = 143, Unit = "قطعة", Price = 133000.00m, CategoryId = 2, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 9, Name = "منضدة مكتب خشب مع مجرات", Code = "6/2/2", Description = "منضدة مكتب خشبية مع أدراج", Quantity = 160, Unit = "قطعة", Price = 56500.00m, CategoryId = 2, LocationId = 6, CreatedDate = now, LastUpdated = now },
+                new Material { Id = 10, Name = "ورق A4", Code = "PAPER-001", Description = "ورق طباعة أبيض", Quantity = 100, Unit = "علبة", Price = 25000.00m, CategoryId = 3, LocationId = 1, CreatedDate = now, LastUpdated = now }
             );
         }
     }
