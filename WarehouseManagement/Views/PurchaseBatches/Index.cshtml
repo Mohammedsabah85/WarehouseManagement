@@ -1,0 +1,218 @@
+@model IEnumerable<WarehouseManagement.Models.PurchaseBatch>
+@{
+    ViewData["Title"] = "دفعات الشراء";
+    var form2Item = ViewBag.Form2Item as WarehouseManagement.Models.Form2Item;
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-cart-check me-2"></i>دفعات الشراء</h2>
+            @if (form2Item != null)
+            {
+                <p class="text-muted mb-0">
+                    للمادة: <strong>@form2Item.MaterialName</strong> - الترميز: <strong>@form2Item.CodeNumber</strong>
+                </p>
+            }
+        </div>
+        <div>
+            @if (form2Item != null)
+            {
+                <a asp-action="Create" asp-route-form2ItemId="@form2Item.Id" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>إضافة دفعة جديدة
+                </a>
+                <a asp-controller="Form2" asp-action="Details" asp-route-id="@form2Item.Id" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-right me-1"></i>العودة للمادة
+                </a>
+            }
+            else
+            {
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i>إضافة دفعة جديدة
+                </a>
+            }
+        </div>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- إحصائيات -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalBatches</h4>
+                    <small>عدد الدفعات</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalQuantity</h4>
+                    <small>إجمالي الكمية</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.TotalValue).ToString("N0")) د.ع</h4>
+                    <small>إجمالي القيمة</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.AveragePrice).ToString("N0")) د.ع</h4>
+                    <small>متوسط السعر</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- فلاتر -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">السنة</label>
+                    <select name="year" class="form-select">
+                        <option value="">-- كل السنوات --</option>
+                        @if (ViewBag.Years != null)
+                        {
+                            foreach (var year in ViewBag.Years)
+                            {
+                                <option value="@year">@year</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">المادة</label>
+                    <select name="form2ItemId" class="form-select">
+                        <option value="">-- كل المواد --</option>
+                        @if (ViewBag.Form2Items != null)
+                        {
+                            foreach (var item in (dynamic)ViewBag.Form2Items)
+                            {
+                                <option value="@item.Id">@item.MaterialName (@item.CodeNumber)</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="bi bi-search me-1"></i>بحث
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i>مسح
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- جدول البيانات -->
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ت</th>
+                                <th>اسم المادة</th>
+                                <th>الرقم الرمزي</th>
+                                <th>سنة الشراء</th>
+                                <th>العدد</th>
+                                <th>سعر المفرد</th>
+                                <th>السعر الكلي</th>
+                                <th>المورد</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.SequenceNumber</td>
+                                    <td>
+                                        <a asp-controller="Form2" asp-action="Details" asp-route-id="@item.Form2ItemId">
+                                            @item.MaterialName
+                                        </a>
+                                    </td>
+                                    <td><code>@item.CodeNumber</code></td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.PurchaseYear</span>
+                                    </td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.UnitPrice.ToString("N0") د.ع</td>
+                                    <td><strong>@item.TotalPrice.ToString("N0") د.ع</strong></td>
+                                    <td>@(item.Supplier ?? "-")</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="تفاصيل">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-primary" title="تعديل">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="حذف">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="4">المجموع</th>
+                                <th>@Model.Sum(m => m.Quantity)</th>
+                                <th>-</th>
+                                <th>@Model.Sum(m => m.TotalPrice).ToString("N0") د.ع</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <p class="text-muted mt-3">لا توجد دفعات شراء مسجلة</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>إضافة دفعة جديدة
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- روابط التقارير -->
+    <div class="mt-4">
+        <a asp-action="Report" class="btn btn-outline-primary me-2">
+            <i class="bi bi-file-earmark-bar-graph me-1"></i>تقرير شامل
+        </a>
+        <a asp-action="YearlyReport" class="btn btn-outline-info">
+            <i class="bi bi-calendar-range me-1"></i>تقرير سنوي
+        </a>
+    </div>
+</div>

@@ -1,0 +1,90 @@
+@model WarehouseManagement.Models.PurchaseBatch
+@{
+    ViewData["Title"] = "تفاصيل دفعة الشراء";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>تفاصيل دفعة الشراء
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">اسم المادة</dt>
+                        <dd class="col-sm-8">
+                            <a asp-controller="Form2" asp-action="Details" asp-route-id="@Model.Form2ItemId">
+                                @Model.MaterialName
+                            </a>
+                        </dd>
+
+                        <dt class="col-sm-4">الرقم الرمزي</dt>
+                        <dd class="col-sm-8"><code>@Model.CodeNumber</code></dd>
+
+                        <dt class="col-sm-4">سنة الشراء</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-secondary fs-6">@Model.PurchaseYear</span>
+                        </dd>
+
+                        @if (Model.PurchaseDate.HasValue)
+                        {
+                            <dt class="col-sm-4">تاريخ الشراء</dt>
+                            <dd class="col-sm-8">@Model.PurchaseDate.Value.ToString("yyyy/MM/dd")</dd>
+                        }
+
+                        <dt class="col-sm-4">العدد/الكمية</dt>
+                        <dd class="col-sm-8"><strong>@Model.Quantity</strong></dd>
+
+                        <dt class="col-sm-4">سعر المفرد</dt>
+                        <dd class="col-sm-8">@Model.UnitPrice.ToString("N0") د.ع</dd>
+
+                        <dt class="col-sm-4">السعر الكلي</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-success fs-5">@Model.TotalPrice.ToString("N0") د.ع</span>
+                        </dd>
+
+                        @if (!string.IsNullOrEmpty(Model.InvoiceNumber))
+                        {
+                            <dt class="col-sm-4">رقم الفاتورة</dt>
+                            <dd class="col-sm-8">@Model.InvoiceNumber</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Supplier))
+                        {
+                            <dt class="col-sm-4">المورد</dt>
+                            <dd class="col-sm-8">@Model.Supplier</dd>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Notes))
+                        {
+                            <dt class="col-sm-4">ملاحظات</dt>
+                            <dd class="col-sm-8">@Model.Notes</dd>
+                        }
+
+                        <dt class="col-sm-4">تاريخ الإنشاء</dt>
+                        <dd class="col-sm-8">@Model.CreatedDate.ToString("yyyy/MM/dd HH:mm")</dd>
+                    </dl>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" asp-route-form2ItemId="@Model.Form2ItemId" class="btn btn-secondary">
+                            <i class="bi bi-arrow-right me-1"></i>العودة
+                        </a>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                                <i class="bi bi-pencil me-1"></i>تعديل
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>حذف
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

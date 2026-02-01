@@ -1,0 +1,125 @@
+@model WarehouseManagement.Models.PurchaseBatch
+@{
+    ViewData["Title"] = "إضافة دفعة شراء";
+    var form2Item = ViewBag.Form2Item as WarehouseManagement.Models.Form2Item;
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>إضافة دفعة شراء جديدة
+                    </h4>
+                </div>
+                <div class="card-body">
+                    @if (form2Item != null)
+                    {
+                        <div class="alert alert-info">
+                            <strong>المادة:</strong> @form2Item.MaterialName
+                            <br />
+                            <strong>الترميز:</strong> @form2Item.CodeNumber
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Form2ItemId" class="form-label">المادة <span class="text-danger">*</span></label>
+                            @if (form2Item != null)
+                            {
+                                <input type="hidden" asp-for="Form2ItemId" />
+                                <input type="text" class="form-control" value="@form2Item.MaterialName (@form2Item.CodeNumber)" disabled />
+                            }
+                            else
+                            {
+                                <select asp-for="Form2ItemId" asp-items="ViewBag.Form2ItemId" class="form-select">
+                                    <option value="">-- اختر المادة --</option>
+                                </select>
+                            }
+                            <span asp-validation-for="Form2ItemId" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PurchaseYear" class="form-label">سنة الشراء <span class="text-danger">*</span></label>
+                                <input asp-for="PurchaseYear" class="form-control" type="number" min="1990" max="2100" />
+                                <span asp-validation-for="PurchaseYear" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="PurchaseDate" class="form-label">تاريخ الشراء</label>
+                                <input asp-for="PurchaseDate" class="form-control" type="date" />
+                                <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Quantity" class="form-label">العدد/الكمية <span class="text-danger">*</span></label>
+                                <input asp-for="Quantity" class="form-control" type="number" min="1" id="quantity" />
+                                <span asp-validation-for="Quantity" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="UnitPrice" class="form-label">سعر المفرد (د.ع) <span class="text-danger">*</span></label>
+                                <input asp-for="UnitPrice" class="form-control" type="number" step="0.01" min="0" id="unitPrice" />
+                                <span asp-validation-for="UnitPrice" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">السعر الكلي (د.ع)</label>
+                                <input type="text" class="form-control bg-light" id="totalPrice" readonly />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="InvoiceNumber" class="form-label">رقم الفاتورة</label>
+                                <input asp-for="InvoiceNumber" class="form-control" />
+                                <span asp-validation-for="InvoiceNumber" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Supplier" class="form-label">المورد</label>
+                                <input asp-for="Supplier" class="form-control" />
+                                <span asp-validation-for="Supplier" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Notes" class="form-label">ملاحظات</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" asp-route-form2ItemId="@Model.Form2ItemId" class="btn btn-secondary">
+                                <i class="bi bi-arrow-right me-1"></i>إلغاء
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-1"></i>حفظ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function calculateTotal() {
+            var quantity = parseFloat(document.getElementById('quantity').value) || 0;
+            var unitPrice = parseFloat(document.getElementById('unitPrice').value) || 0;
+            var total = quantity * unitPrice;
+            document.getElementById('totalPrice').value = total.toLocaleString('ar-IQ') + ' د.ع';
+        }
+
+        document.getElementById('quantity').addEventListener('input', calculateTotal);
+        document.getElementById('unitPrice').addEventListener('input', calculateTotal);
+        
+        // حساب أولي
+        calculateTotal();
+    </script>
+}

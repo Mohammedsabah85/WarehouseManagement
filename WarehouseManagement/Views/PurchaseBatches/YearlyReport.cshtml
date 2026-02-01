@@ -1,0 +1,144 @@
+@model IEnumerable<WarehouseManagement.Models.PurchaseBatch>
+@{
+    ViewData["Title"] = $"تقرير دفعات الشراء - سنة {ViewBag.Year}";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-calendar-range me-2"></i>
+            تقرير دفعات الشراء - سنة @ViewBag.Year
+        </h2>
+        <div>
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                <i class="bi bi-printer me-1"></i>طباعة
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-right me-1"></i>العودة
+            </a>
+        </div>
+    </div>
+
+    <!-- اختيار السنة -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">اختر السنة</label>
+                    <select name="year" class="form-select" onchange="this.form.submit()">
+                        @if (ViewBag.AvailableYears != null)
+                        {
+                            foreach (var year in ViewBag.AvailableYears)
+                            {
+                                <option value="@year" selected="@(year == (int)ViewBag.Year)">@year</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- إحصائيات السنة -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalBatches</h4>
+                    <small>عدد الدفعات</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalQuantity</h4>
+                    <small>إجمالي الكمية</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.TotalValue).ToString("N0")) د.ع</h4>
+                    <small>إجمالي القيمة لسنة @ViewBag.Year</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جدول الدفعات -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">دفعات الشراء لسنة @ViewBag.Year</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>اسم المادة</th>
+                                <th>الرقم الرمزي</th>
+                                <th>العدد</th>
+                                <th>سعر المفرد</th>
+                                <th>السعر الكلي</th>
+                                <th>رقم الفاتورة</th>
+                                <th>المورد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{int counter = 1;}
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@(counter++)</td>
+                                    <td>
+                                        <a asp-controller="Form2" asp-action="Details" asp-route-id="@item.Form2ItemId">
+                                            @item.MaterialName
+                                        </a>
+                                    </td>
+                                    <td><code>@item.CodeNumber</code></td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.UnitPrice.ToString("N0") د.ع</td>
+                                    <td><strong>@item.TotalPrice.ToString("N0") د.ع</strong></td>
+                                    <td>@(item.InvoiceNumber ?? "-")</td>
+                                    <td>@(item.Supplier ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="3">المجموع الكلي</th>
+                                <th>@Model.Sum(m => m.Quantity)</th>
+                                <th>-</th>
+                                <th>@Model.Sum(m => m.TotalPrice).ToString("N0") د.ع</th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <p class="text-muted mt-3">لا توجد دفعات شراء مسجلة لسنة @ViewBag.Year</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .btn, nav, footer, form {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #000 !important;
+        }
+    }
+</style>

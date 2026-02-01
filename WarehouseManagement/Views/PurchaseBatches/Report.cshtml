@@ -1,0 +1,154 @@
+@model IEnumerable<WarehouseManagement.Models.PurchaseBatch>
+@{
+    ViewData["Title"] = "تقرير دفعات الشراء";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-bar-graph me-2"></i>تقرير دفعات الشراء</h2>
+        <div>
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                <i class="bi bi-printer me-1"></i>طباعة
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bi bi-arrow-right me-1"></i>العودة
+            </a>
+        </div>
+    </div>
+
+    <!-- إحصائيات عامة -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.TotalBatches</h4>
+                    <small>عدد الدفعات</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h4>@ViewBag.GrandTotalQuantity</h4>
+                    <small>إجمالي الكمية</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h4>@(((decimal)ViewBag.GrandTotalValue).ToString("N0")) د.ع</h4>
+                    <small>إجمالي القيمة</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تقرير مجمع حسب المادة -->
+    @if (ViewBag.GroupedData != null)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">ملخص حسب المادة</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>اسم المادة</th>
+                                <th>الرقم الرمزي</th>
+                                <th>عدد الدفعات</th>
+                                <th>إجمالي الكمية</th>
+                                <th>إجمالي القيمة</th>
+                                <th>متوسط السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var group in (dynamic)ViewBag.GroupedData)
+                            {
+                                <tr>
+                                    <td>
+                                        <a asp-controller="Form2" asp-action="Details" asp-route-id="@group.Form2ItemId">
+                                            @group.MaterialName
+                                        </a>
+                                    </td>
+                                    <td><code>@group.CodeNumber</code></td>
+                                    <td>@((group.Batches as IEnumerable<WarehouseManagement.Models.PurchaseBatch>)?.Count() ?? 0)</td>
+                                    <td>@group.TotalQuantity</td>
+                                    <td>@(((decimal)group.TotalValue).ToString("N0")) د.ع</td>
+                                    <td>@(((decimal)group.AveragePrice).ToString("N0")) د.ع</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- تفاصيل كل الدفعات -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">تفاصيل جميع الدفعات</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>المادة</th>
+                                <th>الترميز</th>
+                                <th>سنة الشراء</th>
+                                <th>العدد</th>
+                                <th>سعر المفرد</th>
+                                <th>السعر الكلي</th>
+                                <th>المورد</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.MaterialName</td>
+                                    <td><code>@item.CodeNumber</code></td>
+                                    <td>@item.PurchaseYear</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.UnitPrice.ToString("N0")</td>
+                                    <td><strong>@item.TotalPrice.ToString("N0")</strong></td>
+                                    <td>@(item.Supplier ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="3">المجموع الكلي</th>
+                                <th>@Model.Sum(m => m.Quantity)</th>
+                                <th>-</th>
+                                <th>@Model.Sum(m => m.TotalPrice).ToString("N0") د.ع</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted text-center">لا توجد بيانات</p>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .btn, nav, footer {
+            display: none !important;
+        }
+        .card {
+            border: 1px solid #000 !important;
+        }
+    }
+</style>
