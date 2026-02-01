@@ -1,0 +1,226 @@
+@using WarehouseManagement.Extensions
+@model WarehouseManagement.Models.ViewModels.Form5CreateEditViewModel
+
+@{
+    ViewData["Title"] = "إضافة عنصر مستهلك - نموذج (5)";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus-circle"></i> إضافة عنصر مستهلك - نموذج (5)</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-right"></i> العودة للقائمة
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <!-- ربط بنموذج 2 -->
+            @if (Model.AvailableForm2Items.Any())
+            {
+                <div class="card mb-4 border-info">
+                    <div class="card-header bg-info text-white">
+                        <div class="form-check">
+                            <input type="checkbox" asp-for="LinkToForm2" class="form-check-input" id="linkToForm2" />
+                            <label class="form-check-label" for="linkToForm2">
+                                <strong>ربط بعنصر من نموذج (2)</strong>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="card-body" id="form2LinkSection" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">اختر العنصر من نموذج (2)</label>
+                            <select asp-for="SelectedForm2ItemId" class="form-select" id="form2Select">
+                                <option value="">-- اختر عنصر --</option>
+                                @foreach (var item in Model.AvailableForm2Items)
+                                {
+                                    <option value="@item.Id" 
+                                            data-name="@item.MaterialName" 
+                                            data-quantity="@item.QuantityByInventory"
+                                            data-cost="@item.CostInDinar">
+                                        @item.MaterialName (@item.CodeNumber) - الكمية: @item.QuantityByInventory
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3">بيانات المادة</h5>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.MaterialItems" class="form-label"></label>
+                        <input asp-for="Item.MaterialItems" class="form-control" placeholder="اسم المادة" />
+                        <span asp-validation-for="Item.MaterialItems" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.Quantity" class="form-label"></label>
+                                <input asp-for="Item.Quantity" type="number" min="1" class="form-control" />
+                                <span asp-validation-for="Item.Quantity" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.PurchaseYear" class="form-label"></label>
+                                <input asp-for="Item.PurchaseYear" type="number" min="1990" max="2100" class="form-control" />
+                                <span asp-validation-for="Item.PurchaseYear" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.OriginalUnitPriceDinar" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Item.OriginalUnitPriceDinar" type="number" min="0" class="form-control" id="unitPrice" />
+                                    <span class="input-group-text">دينار</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.OriginalTotalPriceDinar" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Item.OriginalTotalPriceDinar" type="number" min="0" class="form-control" id="totalPrice" />
+                                    <span class="input-group-text">دينار</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Department" class="form-label"></label>
+                        <input asp-for="Item.Department" class="form-control" value="قسم الهندسة الكهروميكانيكية" />
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3">معلومات الاستهلاك</h5>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.DamagePercentage" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Item.DamagePercentage" type="number" min="0" max="100" class="form-control" />
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.UsageDuration" class="form-label"></label>
+                                <input asp-for="Item.UsageDuration" class="form-control" placeholder="مثال: 5 سنوات" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.ConsumptionReason" class="form-label"></label>
+                        <select asp-for="Item.ConsumptionReason" class="form-select">
+                            @foreach (var reason in Enum.GetValues<WarehouseManagement.Models.Form5ConsumptionReason>())
+                            {
+                                <option value="@reason">@reason.GetDisplayName()</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.ConsumptionReasonDetails" class="form-label"></label>
+                        <textarea asp-for="Item.ConsumptionReasonDetails" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.CommitteeDecision" class="form-label"></label>
+                        <select asp-for="Item.CommitteeDecision" class="form-select">
+                            @foreach (var decision in Enum.GetValues<WarehouseManagement.Models.Form5CommitteeDecision>())
+                            {
+                                <option value="@decision">@decision.GetDisplayName()</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.CommitteeDecisionDetails" class="form-label"></label>
+                        <textarea asp-for="Item.CommitteeDecisionDetails" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Notes" class="form-label"></label>
+                        <textarea asp-for="Item.Notes" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> إلغاء
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // إظهار/إخفاء قسم ربط نموذج 2
+        const linkCheckbox = document.getElementById('linkToForm2');
+        const linkSection = document.getElementById('form2LinkSection');
+        const form2Select = document.getElementById('form2Select');
+
+        if (linkCheckbox) {
+            linkCheckbox.addEventListener('change', function() {
+                linkSection.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+
+        // ملء البيانات عند اختيار عنصر من نموذج 2
+        if (form2Select) {
+            form2Select.addEventListener('change', function() {
+                const option = this.options[this.selectedIndex];
+                if (option.value) {
+                    document.getElementById('Item_MaterialItems').value = option.dataset.name;
+                    document.getElementById('Item_Quantity').value = option.dataset.quantity;
+                    document.getElementById('totalPrice').value = option.dataset.cost;
+                    
+                    // حساب سعر المفرد
+                    const qty = parseInt(option.dataset.quantity);
+                    const total = parseFloat(option.dataset.cost);
+                    if (qty > 0) {
+                        document.getElementById('unitPrice').value = Math.round(total / qty);
+                    }
+                }
+            });
+        }
+
+        // حساب السعر الكلي تلقائياً
+        const qtyInput = document.getElementById('Item_Quantity');
+        const unitPriceInput = document.getElementById('unitPrice');
+        const totalPriceInput = document.getElementById('totalPrice');
+
+        function calculateTotal() {
+            const qty = parseInt(qtyInput.value) || 0;
+            const unit = parseFloat(unitPriceInput.value) || 0;
+            totalPriceInput.value = qty * unit;
+        }
+
+        qtyInput.addEventListener('input', calculateTotal);
+        unitPriceInput.addEventListener('input', calculateTotal);
+    </script>
+}

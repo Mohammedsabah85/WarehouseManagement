@@ -1,0 +1,199 @@
+@model WarehouseManagement.Models.ViewModels.Form2ReportViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نموذج رقم (2) - @Model.Year</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
+    <style>
+        body {
+            font-family: 'Traditional Arabic', 'Simplified Arabic', Arial, sans-serif;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px double #000;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .header h2 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .header p {
+            font-size: 12px;
+            margin: 0;
+        }
+        table {
+            font-size: 10px;
+            width: 100%;
+        }
+        table th, table td {
+            padding: 4px 6px !important;
+            vertical-align: middle !important;
+        }
+        table thead th {
+            background-color: #333 !important;
+            color: white !important;
+            font-weight: bold;
+            text-align: center;
+        }
+        table tbody td {
+            border: 1px solid #999;
+        }
+        table tfoot th {
+            background-color: #ddd;
+        }
+        .stats-table {
+            width: auto;
+            margin: 0 auto 20px;
+        }
+        .stats-table td {
+            padding: 5px 15px !important;
+            text-align: center;
+        }
+        .footer {
+            margin-top: 30px;
+            border-top: 1px solid #999;
+            padding-top: 15px;
+        }
+        .signature-section {
+            margin-top: 40px;
+        }
+        .signature-box {
+            display: inline-block;
+            width: 30%;
+            text-align: center;
+            vertical-align: top;
+        }
+        .signature-line {
+            border-bottom: 1px solid #000;
+            margin: 30px auto 5px;
+            width: 80%;
+        }
+        @@media print {
+            body { margin: 0; padding: 10px; }
+            .no-print { display: none !important; }
+            @@page { 
+                size: A4 landscape; 
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- رأس التقرير -->
+        <div class="header">
+            <h1>جمهورية العراق</h1>
+            <h2>@Model.Department</h2>
+            <h1 class="mt-3">نموذج رقم (2)</h1>
+            <p>قائمة الموجودات الرئيسية للسنة المالية @Model.Year</p>
+            <p>تاريخ التقرير: @Model.ReportDate.ToString("yyyy/MM/dd")</p>
+        </div>
+
+        <!-- إحصائيات مختصرة -->
+        <table class="table table-bordered stats-table">
+            <tr>
+                <td><strong>إجمالي العناصر:</strong> @Model.Statistics.TotalItems</td>
+                <td><strong>بموجب الجرد:</strong> @Model.Statistics.TotalQuantityByInventory</td>
+                <td><strong>بموجب السجلات:</strong> @Model.Statistics.TotalQuantityByRecords</td>
+                <td><strong>الفرق:</strong> @Model.Statistics.TotalDifference</td>
+                <td><strong>الكلفة الإجمالية:</strong> @Model.Statistics.TotalCost.ToString("N0") دينار</td>
+            </tr>
+        </table>
+
+        <!-- جدول البيانات -->
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th style="width: 30px;">ت</th>
+                    <th style="width: 150px;">اسم المادة</th>
+                    <th style="width: 80px;">وصف المادة</th>
+                    <th style="width: 60px;">رقم الترميز</th>
+                    <th style="width: 50px;">بموجب الجرد</th>
+                    <th style="width: 50px;">بموجب السجلات</th>
+                    <th style="width: 40px;">الفرق</th>
+                    <th style="width: 80px;">محل التواجد</th>
+                    <th style="width: 80px;">الكلفة بالدينار</th>
+                    <th style="width: 50px;">الحالة</th>
+                    <th style="width: 80px;">العائدية</th>
+                    <th>الملاحظات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="text-center">@item.SequenceNumber</td>
+                        <td>@item.MaterialName</td>
+                        <td>@(item.MaterialDescription ?? "-")</td>
+                        <td class="text-center">@item.CodeNumber</td>
+                        <td class="text-center">@item.QuantityByInventory</td>
+                        <td class="text-center">@item.QuantityByRecords</td>
+                        <td class="text-center">@(item.QuantityDifference == 0 ? "-" : item.QuantityDifference.ToString())</td>
+                        <td>@(item.LocationPlace ?? "القسم")</td>
+                        <td class="text-end">@item.CostInDinar.ToString("N0")</td>
+                        <td class="text-center">@item.Condition</td>
+                        <td>@(item.Ownership ?? "-")</td>
+                        <td><small>@(item.Notes ?? "-")</small></td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="4" class="text-end">المجموع:</th>
+                    <th class="text-center">@Model.Statistics.TotalQuantityByInventory</th>
+                    <th class="text-center">@Model.Statistics.TotalQuantityByRecords</th>
+                    <th class="text-center">@Model.Statistics.TotalDifference</th>
+                    <th></th>
+                    <th class="text-end">@Model.Statistics.TotalCost.ToString("N0")</th>
+                    <th colspan="3"></th>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- قسم التواقيع -->
+        <div class="signature-section">
+            <div class="signature-box">
+                <p><strong>أعده:</strong></p>
+                <div class="signature-line"></div>
+                <p>الاسم والتوقيع</p>
+            </div>
+            <div class="signature-box">
+                <p><strong>دقق بواسطة:</strong></p>
+                <div class="signature-line"></div>
+                <p>الاسم والتوقيع</p>
+            </div>
+            <div class="signature-box">
+                <p><strong>صودق عليه:</strong></p>
+                <div class="signature-line"></div>
+                <p>الاسم والتوقيع</p>
+            </div>
+        </div>
+
+        <!-- تذييل -->
+        <div class="footer text-center">
+            <small>تم إنشاء هذا التقرير بواسطة نظام إدارة المخازن - @DateTime.Now.ToString("yyyy/MM/dd HH:mm")</small>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,260 @@
+@model WarehouseManagement.Models.Form2Item
+
+@{
+    ViewData["Title"] = $"تفاصيل: {Model.MaterialName}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-info-circle"></i> تفاصيل العنصر</h2>
+        <p class="text-muted mb-0">نموذج رقم (2) - @Model.MaterialName</p>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="fas fa-edit"></i> تعديل
+        </a>
+        @if (!Model.IsDocumentedInForm5)
+        {
+            <a asp-action="TransferToForm5" asp-route-id="@Model.Id" class="btn btn-warning">
+                <i class="fas fa-arrow-left"></i> نقل لنموذج (5)
+            </a>
+        }
+        <a asp-action="Index" asp-route-year="@Model.InventoryYear" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة
+        </a>
+    </div>
+</div>
+
+@if (Model.IsDocumentedInForm5)
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>تنبيه:</strong> تم تثبيت هذا العنصر في نموذج رقم (5) للموجودات المستهلكة.
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- البيانات الأساسية -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-clipboard-list"></i> البيانات الأساسية</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 200px;" class="bg-light">التسلسل</th>
+                        <td>@Model.SequenceNumber</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">اسم المادة</th>
+                        <td><strong>@Model.MaterialName</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">وصف المادة</th>
+                        <td>@(Model.MaterialDescription ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">رقم الترميز</th>
+                        <td><code class="fs-5">@Model.CodeNumber</code></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">محل التواجد</th>
+                        <td>@(Model.LocationPlace ?? "القسم")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">الحالة</th>
+                        <td>
+                            <span class="badge @(Model.Condition == "جيدة" || Model.Condition == "جيد" ? "bg-success" : Model.Condition == "متوسطة" ? "bg-warning" : "bg-danger") fs-6">
+                                @Model.Condition
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">العائدية</th>
+                        <td>@(Model.Ownership ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">القسم/الدائرة</th>
+                        <td>@(Model.Department ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">سنة الجرد</th>
+                        <td>@Model.InventoryYear</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">تاريخ الجرد</th>
+                        <td>@Model.InventoryDate.ToString("yyyy/MM/dd")</td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <tr>
+                            <th class="bg-light">الملاحظات</th>
+                            <td>@Model.Notes</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+
+        <!-- دفعات الشراء -->
+        @if (Model.PurchaseBatches.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> تفاصيل الشراء حسب السنوات</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ت</th>
+                                <th>سنة الشراء</th>
+                                <th class="text-center">العدد</th>
+                                <th class="text-end">سعر المفرد</th>
+                                <th class="text-end">السعر الكلي</th>
+                                <th>ملاحظات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int seq = 1; }
+                            @foreach (var batch in Model.PurchaseBatches.OrderBy(b => b.PurchaseYear))
+                            {
+                                <tr>
+                                    <td>@(seq++)</td>
+                                    <td>@batch.PurchaseYear</td>
+                                    <td class="text-center">@batch.Quantity</td>
+                                    <td class="text-end">@batch.UnitPrice.ToString("N0")</td>
+                                    <td class="text-end">@batch.TotalPrice.ToString("N0")</td>
+                                    <td>@(batch.Notes ?? "-")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <th colspan="2" class="text-end">المجموع:</th>
+                                <th class="text-center">@Model.PurchaseBatches.Sum(b => b.Quantity)</th>
+                                <th></th>
+                                <th class="text-end">@Model.PurchaseBatches.Sum(b => b.TotalPrice).ToString("N0")</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <a asp-controller="PurchaseBatches" asp-action="Create" asp-route-form2ItemId="@Model.Id" 
+                       class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-plus"></i> إضافة دفعة شراء
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="card mb-4">
+                <div class="card-body text-center py-4">
+                    <p class="text-muted mb-2">لا توجد تفاصيل شراء مسجلة</p>
+                    <a asp-controller="PurchaseBatches" asp-action="Create" asp-route-form2ItemId="@Model.Id" 
+                       class="btn btn-outline-info">
+                        <i class="fas fa-plus"></i> إضافة دفعة شراء
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <!-- الكميات والكلفة -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-calculator"></i> الكميات والكلفة</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <div class="border rounded py-3">
+                            <h3 class="text-primary mb-0">@Model.QuantityByInventory</h3>
+                            <small class="text-muted">بموجب الجرد</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="border rounded py-3">
+                            <h3 class="text-info mb-0">@Model.QuantityByRecords</h3>
+                            <small class="text-muted">بموجب السجلات</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mb-3">
+                    <div class="border rounded py-3 @(Model.QuantityDifference == 0 ? "bg-success text-white" : Model.QuantityDifference > 0 ? "bg-warning" : "bg-danger text-white")">
+                        <h3 class="mb-0">@(Model.QuantityDifference == 0 ? "-" : Model.QuantityDifference.ToString())</h3>
+                        <small>الفرق</small>
+                    </div>
+                </div>
+                <hr />
+                <div class="text-center">
+                    <h2 class="text-success mb-0">@Model.CostInDinar.ToString("N0")</h2>
+                    <p class="text-muted">الكلفة بالدينار</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- معلومات النظام -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> معلومات النظام</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>تاريخ الإنشاء:</strong><br />@Model.CreatedDate.ToString("yyyy/MM/dd HH:mm")</p>
+                <p><strong>آخر تحديث:</strong><br />@Model.LastUpdated.ToString("yyyy/MM/dd HH:mm")</p>
+                @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                {
+                    <p><strong>أنشئ بواسطة:</strong><br />@Model.CreatedBy</p>
+                }
+            </div>
+        </div>
+
+        <!-- ارتباط نموذج 5 -->
+        @if (Model.IsDocumentedInForm5 && Model.Form5Items.Any())
+        {
+            <div class="card mb-4 border-warning">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0"><i class="fas fa-link"></i> مرتبط بنموذج (5)</h5>
+                </div>
+                <div class="card-body">
+                    @foreach (var form5 in Model.Form5Items)
+                    {
+                        <div class="mb-2">
+                            <a asp-controller="Form5" asp-action="Details" asp-route-id="@form5.Id" 
+                               class="btn btn-outline-warning btn-sm w-100">
+                                عرض في نموذج (5) - ت: @form5.SequenceNumber
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- إجراءات سريعة -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> إجراءات سريعة</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> تعديل البيانات
+                </a>
+                <a asp-controller="PurchaseBatches" asp-action="Index" asp-route-form2ItemId="@Model.Id" 
+                   class="btn btn-outline-info">
+                    <i class="fas fa-list"></i> عرض دفعات الشراء
+                </a>
+                @if (!Model.IsDocumentedInForm5)
+                {
+                    <a asp-action="TransferToForm5" asp-route-id="@Model.Id" class="btn btn-outline-warning">
+                        <i class="fas fa-arrow-left"></i> نقل لنموذج (5)
+                    </a>
+                }
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                    <i class="fas fa-trash"></i> حذف العنصر
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

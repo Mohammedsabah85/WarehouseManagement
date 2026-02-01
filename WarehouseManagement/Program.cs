@@ -12,7 +12,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<WarehouseContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+builder.Services.AddScoped<IFormDataService, FormDataService>();
 // Add custom services
 builder.Services.AddScoped<IReportService, ReportService>();
 

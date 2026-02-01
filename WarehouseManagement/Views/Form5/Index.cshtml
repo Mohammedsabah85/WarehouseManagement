@@ -1,0 +1,262 @@
+@using WarehouseManagement.Extensions
+@model WarehouseManagement.Models.ViewModels.Form5ViewModel
+
+@{
+    ViewData["Title"] = "نموذج رقم (5) - الموجودات المستهلكة";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-recycle"></i> نموذج رقم (5)</h2>
+        <p class="text-muted mb-0">قائمة بالموجودات المستهلكة</p>
+    </div>
+    <div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus"></i> إضافة عنصر مستهلك
+        </a>
+        <a asp-action="Report" asp-route-department="@Model.Department" class="btn btn-success">
+            <i class="fas fa-file-alt"></i> عرض التقرير
+        </a>
+        <a asp-action="PrintReport" asp-route-department="@Model.Department" 
+           class="btn btn-info" target="_blank">
+            <i class="fas fa-print"></i> طباعة
+        </a>
+    </div>
+</div>
+
+<!-- فلاتر البحث -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">القسم</label>
+                <select name="department" class="form-select">
+                    <option value="">-- الكل --</option>
+                    @foreach (var dept in (List<string>)ViewBag.Departments)
+                    {
+                        <option value="@dept" selected="@(dept == Model.Department)">@dept</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">البحث</label>
+                <input type="text" name="searchTerm" value="@Model.SearchTerm" 
+                       class="form-control" placeholder="اسم المادة...">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">سبب الاستهلاك</label>
+                <select name="reasonFilter" class="form-select">
+                    <option value="">-- الكل --</option>
+                    @foreach (var reason in Enum.GetValues<WarehouseManagement.Models.Form5ConsumptionReason>())
+                    {
+                        <option value="@reason" selected="@(reason == Model.ReasonFilter)">@reason.GetDisplayName()</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">قرار اللجنة</label>
+                <select name="decisionFilter" class="form-select">
+                    <option value="">-- الكل --</option>
+                    @foreach (var decision in Enum.GetValues<WarehouseManagement.Models.Form5CommitteeDecision>())
+                    {
+                        <option value="@decision" selected="@(decision == Model.DecisionFilter)">@decision.GetDisplayName()</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">السنة</label>
+                <select name="yearFilter" class="form-select">
+                    <option value="">-- الكل --</option>
+                    @foreach (var year in (List<int>)ViewBag.Years)
+                    {
+                        <option value="@year" selected="@(year == Model.YearFilter)">@year</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-search"></i> بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- إحصائيات -->
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">@Model.Statistics.TotalItems</h4>
+                <small>إجمالي العناصر</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">@Model.Statistics.TotalQuantity</h4>
+                <small>إجمالي الكمية</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">@Model.Statistics.TotalOriginalValue.ToString("N0")</h4>
+                <small>القيمة الأصلية</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">@Model.Statistics.TotalResidualValue.ToString("N0")</h4>
+                <small>القيمة المتبقية</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">@Model.Statistics.TotalLoss.ToString("N0")</h4>
+                <small>الخسارة</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white">
+            <div class="card-body text-center py-3">
+                <h4 class="mb-0">@Model.Statistics.ItemsDisposed / @Model.Statistics.ItemsPending</h4>
+                <small>متصرف/معلق</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- جدول البيانات -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center" style="width: 40px;">ت</th>
+                        <th>مفردات المواد</th>
+                        <th class="text-center">الكمية</th>
+                        <th class="text-center">سنة الشراء</th>
+                        <th class="text-end">سعر المفرد</th>
+                        <th class="text-end">الثمن الكلي</th>
+                        <th class="text-center">نسبة الضرر</th>
+                        <th>مدة الاستعمال</th>
+                        <th>سبب الاستهلاك</th>
+                        <th>توجيهات اللجنة</th>
+                        <th class="text-center">الحالة</th>
+                        <th class="text-center no-print" style="width: 100px;">الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr class="@(item.IsDisposed ? "table-secondary" : "")">
+                            <td class="text-center">@item.SequenceNumber</td>
+                            <td>
+                                @item.MaterialItems
+                                @if (item.Form2ItemId.HasValue)
+                                {
+                                    <a asp-controller="Form2" asp-action="Details" asp-route-id="@item.Form2ItemId" 
+                                       class="badge bg-info text-decoration-none ms-1" title="مرتبط بنموذج 2">
+                                        <i class="fas fa-link"></i>
+                                    </a>
+                                }
+                            </td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-center">@item.PurchaseYear</td>
+                            <td class="text-end">@item.OriginalUnitPriceDinar.ToString("N0")</td>
+                            <td class="text-end">@item.OriginalTotalPriceDinar.ToString("N0")</td>
+                            <td class="text-center">
+                                @if (item.DamagePercentage.HasValue)
+                                {
+                                    <span class="badge @(item.DamagePercentage >= 80 ? "bg-danger" : item.DamagePercentage >= 50 ? "bg-warning" : "bg-info")">
+                                        @item.DamagePercentage%
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                            <td>@(item.UsageDuration ?? "-")</td>
+                            <td>
+                                <span class="badge bg-secondary">@item.ConsumptionReason.GetDisplayName()</span>
+                            </td>
+                            <td>
+                                <span class="badge @(item.CommitteeDecision == WarehouseManagement.Models.Form5CommitteeDecision.Dispose ? "bg-danger" : 
+                                                     item.CommitteeDecision == WarehouseManagement.Models.Form5CommitteeDecision.Sell ? "bg-success" : 
+                                                     item.CommitteeDecision == WarehouseManagement.Models.Form5CommitteeDecision.Repair ? "bg-info" : "bg-warning")">
+                                    @item.CommitteeDecision.GetDisplayName()
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if (item.IsDisposed)
+                                {
+                                    <span class="badge bg-success">تم التصرف</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">معلق</span>
+                                }
+                            </td>
+                            <td class="text-center no-print">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-info" title="عرض">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-primary" title="تعديل">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" 
+                                       class="btn btn-outline-danger" title="حذف">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-secondary">
+                    <tr>
+                        <th colspan="2" class="text-end">المجموع:</th>
+                        <th class="text-center">@Model.Statistics.TotalQuantity</th>
+                        <th></th>
+                        <th></th>
+                        <th class="text-end">@Model.Statistics.TotalOriginalValue.ToString("N0")</th>
+                        <th colspan="6"></th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Items.Any())
+{
+    <div class="alert alert-info mt-4">
+        <h5><i class="fas fa-info-circle"></i> لا توجد بيانات</h5>
+        <p>لا توجد موجودات مستهلكة مسجلة. يمكنك إضافة عناصر جديدة أو نقلها من نموذج (2).</p>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('a[title="حذف"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                if (!confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}

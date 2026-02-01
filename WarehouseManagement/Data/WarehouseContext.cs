@@ -16,7 +16,10 @@ namespace WarehouseManagement.Data
         public DbSet<AnnualInventory> AnnualInventories { get; set; }
         public DbSet<PurchasePrice> PurchasePrices { get; set; }
         public DbSet<ConsumedMaterial> ConsumedMaterials { get; set; }
-
+        public DbSet<Form2Item> Form2Items { get; set; }
+        public DbSet<PurchaseBatch> PurchaseBatches { get; set; }
+        public DbSet<Form5Item> Form5Items { get; set; }
+        public DbSet<Form5PurchaseDetail> Form5PurchaseDetails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // تكوين العلاقات بشكل صريح
@@ -119,6 +122,81 @@ namespace WarehouseManagement.Data
 
             modelBuilder.Entity<ConsumedMaterial>()
                 .Property(c => c.ResidualValue)
+                .HasColumnType("decimal(18,2)");
+            // Form2Item Configuration
+            modelBuilder.Entity<Form2Item>()
+                .HasIndex(f => new { f.CodeNumber, f.InventoryYear })
+                .IsUnique();
+
+            modelBuilder.Entity<Form2Item>()
+                .Property(f => f.CostInDinar)
+                .HasColumnType("decimal(18,2)");
+
+            // Form2Item - Material (Optional Many-to-One)
+            modelBuilder.Entity<Form2Item>()
+                .HasOne(f => f.Material)
+                .WithMany()
+                .HasForeignKey(f => f.MaterialId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // PurchaseBatch - Form2Item (Many-to-One)
+            modelBuilder.Entity<PurchaseBatch>()
+                .HasOne(p => p.Form2Item)
+                .WithMany(f => f.PurchaseBatches)
+                .HasForeignKey(p => p.Form2ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<PurchaseBatch>()
+                .Property(p => p.UnitPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<PurchaseBatch>()
+                .Property(p => p.StoredTotalPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<PurchaseBatch>()
+                .HasIndex(p => p.PurchaseYear);
+
+            // Form5Item Configuration
+            modelBuilder.Entity<Form5Item>()
+                .Property(f => f.OriginalUnitPriceDinar)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Form5Item>()
+                .Property(f => f.OriginalTotalPriceDinar)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Form5Item>()
+                .Property(f => f.ResidualValue)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Form5Item>()
+                .Property(f => f.DamagePercentage)
+                .HasColumnType("decimal(5,2)");
+
+            // Form5Item - Form2Item (Optional Many-to-One)
+            modelBuilder.Entity<Form5Item>()
+                .HasOne(f => f.Form2Item)
+                .WithMany(f2 => f2.Form5Items)
+                .HasForeignKey(f => f.Form2ItemId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Form5Item>()
+                .HasIndex(f => f.ReportDate);
+
+            // Form5PurchaseDetail - Form5Item (Many-to-One)
+            modelBuilder.Entity<Form5PurchaseDetail>()
+                .HasOne(p => p.Form5Item)
+                .WithMany(f => f.PurchaseDetails)
+                .HasForeignKey(p => p.Form5ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Form5PurchaseDetail>()
+                .Property(p => p.UnitPrice)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Form5PurchaseDetail>()
+                .Property(p => p.StoredTotalPrice)
                 .HasColumnType("decimal(18,2)");
 
             // منع حذف المراجع المتقاطعة

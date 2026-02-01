@@ -1,0 +1,244 @@
+@model WarehouseManagement.Models.ViewModels.Form2CreateEditViewModel
+
+@{
+    ViewData["Title"] = "إضافة عنصر جديد - نموذج (2)";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-plus-circle"></i> إضافة عنصر جديد - نموذج (2)</h2>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-right"></i> العودة للقائمة
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3">البيانات الأساسية</h5>
+                    
+                    <div class="mb-3">
+                        <label asp-for="Item.MaterialName" class="form-label"></label>
+                        <input asp-for="Item.MaterialName" class="form-control" placeholder="مثال: حاسوب لاب توب" />
+                        <span asp-validation-for="Item.MaterialName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.MaterialDescription" class="form-label"></label>
+                        <input asp-for="Item.MaterialDescription" class="form-control" 
+                               placeholder="مثال: حديد / خشب / المنيوم" />
+                        <small class="text-muted">استخدم "=" لنسخ القيمة من السطر السابق</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.CodeNumber" class="form-label"></label>
+                        <input asp-for="Item.CodeNumber" class="form-control" placeholder="مثال: 1/1/1" />
+                        <span asp-validation-for="Item.CodeNumber" class="text-danger"></span>
+                        <small class="text-muted">رقم الترميز الفريد للمادة</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="Item.QuantityByInventory" class="form-label"></label>
+                                <input asp-for="Item.QuantityByInventory" type="number" min="0" class="form-control" />
+                                <span asp-validation-for="Item.QuantityByInventory" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label asp-for="Item.QuantityByRecords" class="form-label"></label>
+                                <input asp-for="Item.QuantityByRecords" type="number" min="0" class="form-control" />
+                                <span asp-validation-for="Item.QuantityByRecords" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">الفرق</label>
+                                <input type="text" id="differenceDisplay" class="form-control" readonly 
+                                       style="background-color: #e9ecef;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.CostInDinar" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="Item.CostInDinar" type="number" min="0" step="1" class="form-control" />
+                            <span class="input-group-text">دينار</span>
+                        </div>
+                        <span asp-validation-for="Item.CostInDinar" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h5 class="border-bottom pb-2 mb-3">معلومات إضافية</h5>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.LocationPlace" class="form-label"></label>
+                        <input asp-for="Item.LocationPlace" class="form-control" placeholder="مثال: القسم" />
+                        <small class="text-muted">استخدم "=" لنسخ القيمة من السطر السابق</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Condition" class="form-label"></label>
+                        <select asp-for="Item.Condition" class="form-select">
+                            <option value="ممتازة">ممتازة</option>
+                            <option value="جيدة" selected>جيدة</option>
+                            <option value="جيد">جيد</option>
+                            <option value="متوسطة">متوسطة</option>
+                            <option value="ضعيفة">ضعيفة</option>
+                            <option value="تالفة">تالفة</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Ownership" class="form-label"></label>
+                        <input asp-for="Item.Ownership" class="form-control" 
+                               placeholder="مثال: كهروميكانيك" />
+                        <small class="text-muted">استخدم "=" لنسخ القيمة من السطر السابق</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.InventoryYear" class="form-label"></label>
+                                <input asp-for="Item.InventoryYear" type="number" 
+                                       min="2000" max="2100" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Item.Department" class="form-label"></label>
+                                <input asp-for="Item.Department" class="form-control" 
+                                       placeholder="قسم الهندسة الكهروميكانيكية" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Item.Notes" class="form-label"></label>
+                        <textarea asp-for="Item.Notes" class="form-control" rows="3" 
+                                  placeholder="ملاحظات إضافية..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <hr />
+
+            <!-- قسم دفعات الشراء -->
+            <div class="mb-4">
+                <div class="form-check mb-3">
+                    <input type="checkbox" asp-for="CreateWithPurchaseBatches" class="form-check-input" 
+                           id="createWithBatches" />
+                    <label class="form-check-label" for="createWithBatches">
+                        <strong>إضافة تفاصيل الشراء حسب السنوات</strong>
+                    </label>
+                </div>
+
+                <div id="purchaseBatchesSection" style="display: none;">
+                    <h5 class="border-bottom pb-2 mb-3">تفاصيل الشراء</h5>
+                    <div id="batchesContainer">
+                        <!-- سيتم إضافة الدفعات هنا بـ JavaScript -->
+                    </div>
+                    <button type="button" class="btn btn-outline-success btn-sm" id="addBatchBtn">
+                        <i class="fas fa-plus"></i> إضافة دفعة شراء
+                    </button>
+                </div>
+            </div>
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> إلغاء
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // حساب الفرق تلقائياً
+        const qtyInventory = document.getElementById('Item_QuantityByInventory');
+        const qtyRecords = document.getElementById('Item_QuantityByRecords');
+        const diffDisplay = document.getElementById('differenceDisplay');
+
+        function updateDifference() {
+            const inv = parseInt(qtyInventory.value) || 0;
+            const rec = parseInt(qtyRecords.value) || 0;
+            const diff = inv - rec;
+            diffDisplay.value = diff === 0 ? '-' : diff;
+            diffDisplay.style.color = diff === 0 ? '' : (diff > 0 ? 'green' : 'red');
+        }
+
+        qtyInventory.addEventListener('input', updateDifference);
+        qtyRecords.addEventListener('input', updateDifference);
+        updateDifference();
+
+        // إظهار/إخفاء قسم دفعات الشراء
+        const createWithBatches = document.getElementById('createWithBatches');
+        const batchesSection = document.getElementById('purchaseBatchesSection');
+
+        createWithBatches.addEventListener('change', function() {
+            batchesSection.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // إضافة دفعة شراء
+        let batchIndex = 0;
+        document.getElementById('addBatchBtn').addEventListener('click', function() {
+            const container = document.getElementById('batchesContainer');
+            const html = `
+                <div class="card mb-2 batch-item" data-index="${batchIndex}">
+                    <div class="card-body py-2">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <input type="number" name="PurchaseBatches[${batchIndex}].PurchaseYear" 
+                                       class="form-control form-control-sm" placeholder="السنة" 
+                                       value="${new Date().getFullYear()}" />
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" name="PurchaseBatches[${batchIndex}].Quantity" 
+                                       class="form-control form-control-sm" placeholder="الكمية" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" name="PurchaseBatches[${batchIndex}].UnitPrice" 
+                                       class="form-control form-control-sm" placeholder="سعر المفرد" />
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="PurchaseBatches[${batchIndex}].Notes" 
+                                       class="form-control form-control-sm" placeholder="ملاحظات" />
+                            </div>
+                            <div class="col-md-1">
+                                <input type="hidden" name="PurchaseBatches[${batchIndex}].IsSelected" value="true" />
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-outline-danger btn-sm remove-batch">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            batchIndex++;
+        });
+
+        // حذف دفعة شراء
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-batch')) {
+                e.target.closest('.batch-item').remove();
+            }
+        });
+    </script>
+}

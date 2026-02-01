@@ -1,0 +1,306 @@
+@using WarehouseManagement.Extensions
+@model WarehouseManagement.Models.Form5Item
+
+@{
+    ViewData["Title"] = $"تفاصيل: {Model.MaterialItems}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-info-circle"></i> تفاصيل العنصر المستهلك</h2>
+        <p class="text-muted mb-0">نموذج رقم (5) - @Model.MaterialItems</p>
+    </div>
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+            <i class="fas fa-edit"></i> تعديل
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-right"></i> العودة
+        </a>
+    </div>
+</div>
+
+@if (Model.IsDisposed)
+{
+    <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <strong>تم التصرف:</strong> تم التصرف بهذه المادة بتاريخ @Model.DisposalDate?.ToString("yyyy/MM/dd")
+        @if (!string.IsNullOrEmpty(Model.DisposalRecordNumber))
+        {
+            <span>- رقم المحضر: @Model.DisposalRecordNumber</span>
+        }
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- بيانات المادة -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-box"></i> بيانات المادة</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 200px;" class="bg-light">التسلسل</th>
+                        <td>@Model.SequenceNumber</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">مفردات المواد</th>
+                        <td><strong>@Model.MaterialItems</strong></td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">الكمية</th>
+                        <td>@Model.Quantity</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">سنة الشراء</th>
+                        <td>@Model.PurchaseYear</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">القسم/الدائرة</th>
+                        <td>@Model.Department</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">تاريخ التقرير</th>
+                        <td>@Model.ReportDate.ToString("yyyy/MM/dd")</td>
+                    </tr>
+                    @if (Model.Form2ItemId.HasValue)
+                    {
+                        <tr>
+                            <th class="bg-light">مرتبط بنموذج (2)</th>
+                            <td>
+                                <a asp-controller="Form2" asp-action="Details" asp-route-id="@Model.Form2ItemId" 
+                                   class="btn btn-outline-info btn-sm">
+                                    عرض في نموذج (2)
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+
+        <!-- بيانات الاستهلاك -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> بيانات الاستهلاك</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width: 200px;" class="bg-light">نسبة الضرر</th>
+                        <td>
+                            @if (Model.DamagePercentage.HasValue)
+                            {
+                                <div class="progress" style="height: 25px;">
+                                    <div class="progress-bar @(Model.DamagePercentage >= 80 ? "bg-danger" : Model.DamagePercentage >= 50 ? "bg-warning" : "bg-info")" 
+                                         style="width: @Model.DamagePercentage%;">
+                                        @Model.DamagePercentage%
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <span>غير محدد</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">مدة الاستعمال</th>
+                        <td>@(Model.UsageDuration ?? "غير محدد")</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">سبب الاستهلاك</th>
+                        <td>
+                            <span class="badge bg-secondary fs-6">@Model.ConsumptionReason.GetDisplayName()</span>
+                            @if (!string.IsNullOrEmpty(Model.ConsumptionReasonDetails))
+                            {
+                                <br /><small class="text-muted">@Model.ConsumptionReasonDetails</small>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">توجيهات اللجنة</th>
+                        <td>
+                            <span class="badge @(Model.CommitteeDecision == WarehouseManagement.Models.Form5CommitteeDecision.Dispose ? "bg-danger" : 
+                                                 Model.CommitteeDecision == WarehouseManagement.Models.Form5CommitteeDecision.Sell ? "bg-success" : 
+                                                 Model.CommitteeDecision == WarehouseManagement.Models.Form5CommitteeDecision.Repair ? "bg-info" : "bg-warning") fs-6">
+                                @Model.CommitteeDecision.GetDisplayName()
+                            </span>
+                            @if (!string.IsNullOrEmpty(Model.CommitteeDecisionDetails))
+                            {
+                                <br /><small class="text-muted">@Model.CommitteeDecisionDetails</small>
+                            }
+                        </td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <tr>
+                            <th class="bg-light">ملاحظات</th>
+                            <td>@Model.Notes</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+        </div>
+
+        <!-- تفاصيل الشراء إن وجدت -->
+        @if (Model.PurchaseDetails.Any())
+        {
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart"></i> تفاصيل الشراء حسب السنوات</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>سنة الشراء</th>
+                                <th class="text-center">العدد</th>
+                                <th class="text-end">سعر المفرد</th>
+                                <th class="text-end">السعر الكلي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var detail in Model.PurchaseDetails.OrderBy(d => d.PurchaseYear))
+                            {
+                                <tr>
+                                    <td>@detail.PurchaseYear</td>
+                                    <td class="text-center">@detail.Quantity</td>
+                                    <td class="text-end">@detail.UnitPrice.ToString("N0")</td>
+                                    <td class="text-end">@detail.TotalPrice.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot class="table-secondary">
+                            <tr>
+                                <th>المجموع:</th>
+                                <th class="text-center">@Model.PurchaseDetails.Sum(d => d.Quantity)</th>
+                                <th></th>
+                                <th class="text-end">@Model.PurchaseDetails.Sum(d => d.TotalPrice).ToString("N0")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-md-4">
+        <!-- القيمة المالية -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-money-bill-wave"></i> القيمة المالية</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <small class="text-muted">سعر المفرد عند الشراء</small>
+                    <h3 class="text-primary mb-0">@Model.OriginalUnitPriceDinar.ToString("N0")</h3>
+                    <small>دينار</small>
+                </div>
+                <hr />
+                <div class="text-center mb-3">
+                    <small class="text-muted">الثمن الكلي عند الشراء</small>
+                    <h2 class="text-success mb-0">@Model.OriginalTotalPriceDinar.ToString("N0")</h2>
+                    <small>دينار</small>
+                </div>
+                @if (Model.ResidualValue.HasValue)
+                {
+                    <hr />
+                    <div class="text-center mb-3">
+                        <small class="text-muted">القيمة المتبقية</small>
+                        <h3 class="text-warning mb-0">@Model.ResidualValue.Value.ToString("N0")</h3>
+                        <small>دينار</small>
+                    </div>
+                    <div class="text-center">
+                        <small class="text-muted">الخسارة</small>
+                        <h3 class="text-danger mb-0">@((Model.OriginalTotalPriceDinar - Model.ResidualValue.Value).ToString("N0"))</h3>
+                        <small>دينار</small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- حالة التصرف -->
+        <div class="card mb-4">
+            <div class="card-header @(Model.IsDisposed ? "bg-success" : "bg-warning") text-white">
+                <h5 class="mb-0"><i class="fas fa-tasks"></i> حالة التصرف</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.IsDisposed)
+                {
+                    <div class="text-center">
+                        <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                        <h5>تم التصرف</h5>
+                        <p class="text-muted">@Model.DisposalDate?.ToString("yyyy/MM/dd")</p>
+                        @if (!string.IsNullOrEmpty(Model.DisposalRecordNumber))
+                        {
+                            <p><strong>رقم المحضر:</strong> @Model.DisposalRecordNumber</p>
+                        }
+                        <form asp-action="ProcessDecision" asp-route-id="@Model.Id" method="post">
+                            <input type="hidden" name="action" value="revert" />
+                            <button type="submit" class="btn btn-outline-warning btn-sm" 
+                                    onclick="return confirm('هل تريد إلغاء التصرف؟')">
+                                <i class="fas fa-undo"></i> إلغاء التصرف
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center">
+                        <i class="fas fa-clock fa-3x text-warning mb-2"></i>
+                        <h5>في انتظار التصرف</h5>
+                        <p class="text-muted">لم يتم التصرف بالمادة بعد</p>
+                        
+                        <form asp-action="ProcessDecision" asp-route-id="@Model.Id" method="post" class="mt-3">
+                            <input type="hidden" name="action" value="dispose" />
+                            <div class="mb-2">
+                                <input type="text" name="disposalRecordNumber" class="form-control form-control-sm" 
+                                       placeholder="رقم محضر التصرف (اختياري)" />
+                            </div>
+                            <button type="submit" class="btn btn-success" 
+                                    onclick="return confirm('هل تريد تأكيد التصرف بالمادة؟')">
+                                <i class="fas fa-check"></i> تأكيد التصرف
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- معلومات النظام -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> معلومات النظام</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>تاريخ الإنشاء:</strong><br />@Model.CreatedDate.ToString("yyyy/MM/dd HH:mm")</p>
+                <p><strong>آخر تحديث:</strong><br />@Model.LastUpdated.ToString("yyyy/MM/dd HH:mm")</p>
+                @if (!string.IsNullOrEmpty(Model.CreatedBy))
+                {
+                    <p><strong>أنشئ بواسطة:</strong><br />@Model.CreatedBy</p>
+                }
+            </div>
+        </div>
+
+        <!-- إجراءات سريعة -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-bolt"></i> إجراءات سريعة</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                    <i class="fas fa-edit"></i> تعديل البيانات
+                </a>
+                <a asp-action="AddPurchaseDetail" asp-route-id="@Model.Id" class="btn btn-outline-info">
+                    <i class="fas fa-plus"></i> إضافة تفاصيل شراء
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                    <i class="fas fa-trash"></i> حذف العنصر
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
